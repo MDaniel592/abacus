@@ -24,7 +24,7 @@ export default function App() {
   LogBox.ignoreAllLogs(true);
 
   const cache = async () => {
-    const cacheFonts = (fonts: { [p: string]: string }[]) => fonts.map((font) => loadAsync(font));
+    const cacheFonts = (fonts: Parameters<typeof loadAsync>[0][]) => fonts.map((font) => loadAsync(font));
     const fontAssets = cacheFonts([
       AntDesign.font,
       Ionicons.font,
