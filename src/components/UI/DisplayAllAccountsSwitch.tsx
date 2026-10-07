@@ -8,7 +8,7 @@ import { useThemeColors } from '../../lib/common';
 export default function DisplayAllAccountsSwitch() {
   const { colors } = useThemeColors();
   const displayAllAccounts = useSelector((state: RootState) => state.configuration.displayAllAccounts);
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
   const dispatch = useDispatch<RootDispatch>();
 
   const onSwitch = async (bool: boolean) => {

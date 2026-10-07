@@ -29,11 +29,13 @@ import {
 
 export default function SettingsScreen({ navigation }: ScreenType) {
   const { colors } = useThemeColors();
+  const hideBalance = useSelector((state: RootState) => state.configuration.hideBalance);
+  const preferredScheme = useSelector((state: RootState) => state.configuration.preferredColorScheme);
   const closeTransactionScreen = useSelector((state: RootState) => state.configuration.closeTransactionScreen);
   const backendURL = useSelector((state: RootState) => state.configuration.backendURL);
   const useBiometricAuth = useSelector((state: RootState) => state.configuration.useBiometricAuth);
   const dispatch = useDispatch<RootDispatch>();
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
   const {
     configuration: {
       setUseBiometricAuth,
@@ -125,7 +127,31 @@ export default function SettingsScreen({ navigation }: ScreenType) {
 
   return (
     <AScrollView>
-      <AText py={10} px={10} fontSize={18} bold>
+      <AText fontSize={16} bold py={8}>{translate('configuration_appearance')}</AText>
+      <AStack row style={{ marginBottom: 12 }}>
+        {[{ value: 'light', label: 'configuration_light' }, { value: 'dark', label: 'configuration_dark' }, { value: null, label: 'configuration_system' }].map((choice) => (
+          <APressable
+            key={choice.label}
+            onPress={() => dispatch.configuration.setPreferredColorScheme(choice.value as 'light' | 'dark' | null)}
+            style={{
+              flex: 1, paddingVertical: 9, backgroundColor: (preferredScheme || null) === choice.value ? selectedBrandStyle : colors.tileBackgroundColor, borderRadius: 8, marginHorizontal: 2,
+            }}
+          >
+            <AText textAlign="center" fontSize={12} color={(preferredScheme || null) === choice.value ? 'white' : colors.text}>{translate(choice.label)}</AText>
+          </APressable>
+        ))}
+      </AStack>
+      <AStack
+        row
+        justifyContent="space-between"
+        style={{
+          padding: 12, backgroundColor: colors.tileBackgroundColor, borderRadius: 8, marginBottom: 12,
+        }}
+      >
+        <AText fontSize={14}>{translate('configuration_private_mode')}</AText>
+        <Switch accessibilityLabel={translate('configuration_private_mode')} thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} value={hideBalance} onValueChange={(value) => { dispatch.configuration.setHideBalance(value); }} />
+      </AStack>
+      <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_security')}
       </AText>
       <AView
@@ -140,7 +166,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 45,
+            height: 42,
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginLeft: 10,
@@ -157,7 +183,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={goToAccounts}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             marginLeft: 10,
             marginRight: 10,
             borderBottomWidth: 0.5,
@@ -171,7 +197,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 45,
+            height: 42,
             marginLeft: 10,
             marginRight: 10,
           }}
@@ -183,7 +209,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
         </AStack>
       </AView>
 
-      <AText py={10} px={10} fontSize={18} bold>
+      <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_about')}
       </AText>
       <AView
@@ -198,7 +224,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 45,
+            height: 42,
             marginLeft: 10,
             paddingRight: 10,
             borderBottomWidth: 0.5,
@@ -213,7 +239,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus/discussions/')}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingRight: 10,
             marginLeft: 10,
             borderBottomWidth: 0.5,
@@ -228,7 +254,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus/issues/new')}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingRight: 10,
             marginLeft: 10,
             borderBottomWidth: 0.5,
@@ -243,7 +269,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus')}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingRight: 10,
             marginLeft: 10,
             borderBottomWidth: 0.5,
@@ -258,7 +284,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={reviewApp}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingRight: 10,
             marginLeft: 10,
           }}
@@ -267,7 +293,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           <Ionicons name={Platform.select({ ios: 'logo-apple-appstore', android: 'logo-google-playstore' })} size={23} color="gray" />
         </APressable>
       </AView>
-      <AText py={10} px={10} fontSize={18} bold>
+      <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_transaction_form')}
       </AText>
       <AView
@@ -282,7 +308,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 45,
+            height: 42,
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginLeft: 10,
@@ -295,7 +321,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
         </AStack>
       </AView>
 
-      <AText py={10} px={10} fontSize={18} bold>
+      <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_theme')}
       </AText>
       <AView
@@ -311,7 +337,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => navigation.navigate('SettingsColorSelectionScreen', { filterType: '', selectFilter: () => {} })}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginLeft: 10,
@@ -324,7 +350,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
         </APressable>
       </AView>
 
-      <AText py={10} px={10} fontSize={18} bold>
+      <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_debug')}
       </AText>
       <AView
@@ -340,7 +366,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus/blob/master/.github/HELP.md')}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginLeft: 10,
@@ -356,7 +382,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={showResetCacheAlert}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginLeft: 10,
@@ -372,7 +398,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={showLogoutAlert}
           style={{
             justifyContent: 'space-between',
-            height: 45,
+            height: 42,
             paddingHorizontal: 10,
             paddingVertical: 5,
             marginLeft: 10,
@@ -383,7 +409,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
         </APressable>
       </AView>
 
-      <AView style={{ height: 170 }} />
+      <AView style={{ height: 24 }} />
     </AScrollView>
   );
 }

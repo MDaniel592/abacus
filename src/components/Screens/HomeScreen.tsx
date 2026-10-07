@@ -1,6 +1,5 @@
 import React, {
   useEffect,
-  useMemo,
   useRef,
   useCallback,
   useState,
@@ -9,54 +8,48 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   CommonActions,
   useFocusEffect,
-  useScrollToTop,
   useNavigation,
 } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   RefreshControl,
-  Animated,
-  Switch,
   View, Pressable,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import axios from 'axios';
-import type { PagerViewOnPageScrollEventData } from 'react-native-pager-view';
 import PagerView from 'react-native-pager-view';
 
-import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import moment from 'moment';
+import usePrivateNumberFormat from '../../lib/use-private-number-format';
 import { RootDispatch, RootState } from '../../store';
 import translate from '../../i18n/locale';
-import { localNumberFormat, useThemeColors } from '../../lib/common';
+import { useThemeColors } from '../../lib/common';
 
-import Pagination from '../UI/Pagination';
 import {
   AScrollView,
   AStack,
   AText,
-  AView,
   AProgressBar,
   ASkeleton, AStackFlex,
 } from '../UI/ALibrary';
 import DisplayAllAccountsSwitch from '../UI/DisplayAllAccountsSwitch';
-import IncomeExpenseBar from '../UI/IncomeExpenseBar';
 import ErrorBoundary from '../UI/ErrorBoundary';
+import IncomeExpenseBar from '../UI/IncomeExpenseBar';
+import { NO_CATEGORY } from '../../lib/transaction-search';
 
-const EXTRA_SCROLL_PADDING = 120;
-
-const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+const EXTRA_SCROLL_PADDING = 24;
 
 function AssetsAccounts() {
+  const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
-  const tabBarHeight = useBottomTabBarHeight();
   const accounts = useSelector((state: RootState) => state.accounts.accounts);
   const displayAllAccounts = useSelector((state: RootState) => state.configuration.displayAllAccounts);
   const loading = useSelector((state: RootState) => state.loading.effects.accounts.getAccounts?.loading);
   const dispatch = useDispatch<RootDispatch>();
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
 
   const [nameSortOrder, setNameSortOrder] = useState('asc');
   const [balanceSortOrder, setBalanceSortOrder] = useState('desc');
@@ -91,264 +84,158 @@ function AssetsAccounts() {
   return (
     <AScrollView
       showsVerticalScrollIndicator={false}
-      style={{ paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
-      refreshControl={(
-        <RefreshControl
-          refreshing={false}
-          onRefresh={() => Promise.all([
-            dispatch.accounts.getAccounts(),
-            dispatch.firefly.getNetWorth(),
-          ])}
-        />
-      )}
+      style={{ paddingHorizontal: 16, paddingBottom: EXTRA_SCROLL_PADDING }}
+      refreshControl={<RefreshControl refreshing={false} onRefresh={() => Promise.all([dispatch.accounts.getAccounts(), dispatch.firefly.getNetWorth()])} />}
     >
-      <AView>
-        <AStack mx={15} my={10} row justifyContent="space-between" alignItems="center">
-          <AText fontSize={25} bold>
-            {displayAllAccounts ? translate('home_all_accounts') : translate('home_accounts')}
-          </AText>
-          <DisplayAllAccountsSwitch />
-        </AStack>
-        <AStack px={5} row justifyContent="space-between">
-          <View style={{ flex: 1, alignItems: 'flex-start', paddingLeft: '5%' }}>
-            <TouchableOpacity onPress={() => handleSortPress('left')}>
-              <MaterialCommunityIcons
-                name="sort"
-                size={22}
-                color={lastPressed === 'left' ? selectedBrandStyle : colors.text}
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: '5%' }}>
-            <TouchableOpacity onPress={() => handleSortPress('right')}>
-              <MaterialCommunityIcons
-                name="sort"
-                size={22}
-                color={lastPressed === 'right' ? selectedBrandStyle : colors.text}
-                style={{ transform: [{ scaleX: -1 }] }}
-              />
-            </TouchableOpacity>
-          </View>
-        </AStack>
-        {sortedAccounts.map((account, index) => {
-          const balance = parseFloat(account.attributes.currentBalance);
-          const balanceDifference = parseFloat(account.attributes.balanceDifference);
-          const balanceDifferencePercent = balance && balanceDifference
-            ? (Math.round((balanceDifference / Math.abs(balance)) * 10000) / 100)
-            : 0;
-          return (
-            <AStackFlex
-              key={account.id}
-              row
-              mx={20}
-              style={{
-                height: 45,
-                maxWidth: '90%',
-                borderColor: colors.listBorderColor,
-                borderBottomWidth: index + 1 === accounts.length ? 0 : 0.5,
-              }}
+      <View style={{
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12,
+      }}
+      >
+        <View>
+          <AText fontSize={17} bold>{translate('home_accounts')}</AText>
+          <AText fontSize={11} color={colors.greyLight}>{translate('home_accounts_period')}</AText>
+        </View>
+        <DisplayAllAccountsSwitch />
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+        <TouchableOpacity accessibilityLabel={translate('home_sort_name')} onPress={() => handleSortPress('left')}>
+          <MaterialCommunityIcons name="sort-alphabetical-ascending" size={22} color={lastPressed === 'left' ? selectedBrandStyle : colors.greyLight} />
+        </TouchableOpacity>
+        <TouchableOpacity accessibilityLabel={translate('home_sort_balance')} onPress={() => handleSortPress('right')}>
+          <MaterialCommunityIcons name="sort-numeric-descending" size={22} color={lastPressed === 'right' ? selectedBrandStyle : colors.greyLight} />
+        </TouchableOpacity>
+      </View>
+      {sortedAccounts.map((account) => {
+        const balance = parseFloat(account.attributes.currentBalance);
+        const difference = parseFloat(account.attributes.balanceDifference || '0');
+        return (
+          <View
+            key={account.id}
+            style={{
+              borderWidth: 1, borderColor: colors.listBorderColor, borderRadius: 10, padding: 9, marginBottom: 6, backgroundColor: colors.tileBackgroundColor,
+            }}
+          >
+            <View style={{
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+            }}
             >
-              <AStackFlex
-                row
-                gap={10}
-                justifyContent="flex-start"
-                alignItems="center"
-              >
-                <AText
-                  fontSize={14}
-                  numberOfLines={1}
-                >
+              <View style={{ flex: 1 }}>
+                <AText fontSize={13} bold numberOfLines={2}>
                   {account.attributes.name}
-                  <AText fontSize={10}>
-                    {account.attributes.includeNetWorth ? '' : '*'}
-                  </AText>
+                  {account.attributes.includeNetWorth ? '' : ' *'}
                 </AText>
-
-                {balanceDifferencePercent !== 0 && (
-                  <ASkeleton loading={loading}>
-                    <AText
-                      fontSize={12}
-                      numberOfLines={2}
-                      textAlign="center"
-                      px={3}
-                      style={{
-                        backgroundColor: balanceDifferencePercent < 0 && account.attributes.type !== 'liabilities' ? colors.red : colors.green,
-                        borderRadius: 6,
-                      }}
-                      color="white"
-                    >
-                      {balanceDifferencePercent}
-                      %
-                    </AText>
-                  </ASkeleton>
-                )}
-              </AStackFlex>
-              <AStackFlex alignItems="flex-end" style={{ width: '100%' }}>
-                <ASkeleton loading={loading}>
-                  <AText
-                    maxWidth={150}
-                    fontSize={14}
-                    numberOfLines={2}
-                    textAlign="right"
-                  >
-                    {localNumberFormat(account.attributes.currencyCode, balance)}
-                  </AText>
-                  {balanceDifferencePercent !== 0 && (
-                    <AText
-                      maxWidth={150}
-                      fontSize={12}
-                      numberOfLines={2}
-                      textAlign="right"
-                      color={balanceDifferencePercent < 0 && account.attributes.type !== 'liabilities' ? colors.brandDanger : colors.brandSuccess}
-                    >
-                      {localNumberFormat(account.attributes.currencyCode, balanceDifference)}
-                    </AText>
-                  )}
-                </ASkeleton>
-              </AStackFlex>
-            </AStackFlex>
-          );
-        })}
-        <AText fontSize={9} py={10} px={15}>
-          {translate('account_not_included_in_net_worth')}
-        </AText>
-      </AView>
+                <AText fontSize={11} py={2} color={colors.greyLight}>{account.attributes.currencyCode}</AText>
+              </View>
+              <ASkeleton loading={loading}>
+                <AText fontSize={16} bold textAlign="right" numberOfLines={1} adjustsFontSizeToFit>{localNumberFormat(account.attributes.currencyCode, balance)}</AText>
+              </ASkeleton>
+            </View>
+            <View style={{
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+            }}
+            >
+              <AText fontSize={10} color={colors.greyLight}>{translate('home_period_change')}</AText>
+              <ASkeleton loading={loading}>
+                <AText fontSize={12} color={difference < 0 && account.attributes.type !== 'liabilities' ? colors.brandDanger : colors.brandSuccess}>
+                  {difference > 0 ? '+' : ''}
+                  {localNumberFormat(account.attributes.currencyCode, difference)}
+                </AText>
+              </ASkeleton>
+            </View>
+          </View>
+        );
+      })}
+      {!loading && sortedAccounts.length === 0 && <AText fontSize={13} py={24}>{translate('home_no_accounts')}</AText>}
+      <AText fontSize={10} py={10} color={colors.greyLight}>{translate('account_not_included_in_net_worth')}</AText>
     </AScrollView>
   );
 }
 
 function InsightCategories() {
+  const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
-  const tabBarHeight = useBottomTabBarHeight();
   const insightCategories = useSelector((state: RootState) => state.categories.insightCategories);
-  const insightCategoriesTotal = useSelector((state: RootState) => state.categories.total);
-  const insightCategoriesPerDay = useSelector((state: RootState) => state.categories.perDay);
+  const total = useSelector((state: RootState) => state.categories.total);
+  const perDay = useSelector((state: RootState) => state.categories.perDay);
   const loading = useSelector((state: RootState) => state.loading.effects.categories.getInsightCategories?.loading);
-  const startDate = useSelector((state: RootState) => state.firefly.rangeDetails.start);
+  const start = useSelector((state: RootState) => state.firefly.rangeDetails.start);
+  const end = useSelector((state: RootState) => state.firefly.rangeDetails.end);
   const dispatch = useDispatch<RootDispatch>();
   const navigation = useNavigation();
-  const expensesOnly = useSelector((state: RootState) => state.configuration.displayOnlyExpenseCategories);
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const rows = [...insightCategories]
+    .sort((left, right) => Math.abs(right.expense) - Math.abs(left.expense));
 
-  const onSwitch = async (bool: boolean) => {
-    dispatch.configuration.setDisplayOnlyExpenseCategories(bool);
-    return Promise.resolve();
-  };
+  const openCategory = (category: string) => navigation.dispatch(CommonActions.navigate(translate('navigation_transactions_tab'), {
+    screen: 'TransactionsScreen',
+    merge: true,
+    params: {
+      category,
+      transactionType: '',
+      startDate: new Date(`${start}T12:00:00`),
+      endDate: new Date(`${end}T12:00:00`),
+    },
+  }));
 
-  const goToTransactions = async (id: string, transactionSearch: string) => {
-    navigation.dispatch(
-      CommonActions.navigate(translate('navigation_transactions_tab'), {
-        screen: 'TransactionsScreen',
-        merge: true,
-        params: {
-          id,
-          transactionSearch,
-          startDate: new Date(`${startDate}T12:00:00`),
-        },
-      }),
+  const categoryScale = Math.max(1, ...insightCategories.flatMap((category) => [category.income, Math.abs(category.expense)]));
+  const renderRow = (category, summary = false) => {
+    const scale = summary ? Math.max(1, category.income, Math.abs(category.expense)) : categoryScale;
+    return (
+      <View style={{ paddingVertical: summary ? 9 : 7, borderBottomWidth: 0.5, borderColor: colors.listBorderColor }}>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 3,
+        }}
+        >
+          <AText fontSize={category.name === 'perday' ? 10 : 12} bold={summary} style={{ flex: 1 }} numberOfLines={2}>
+            {category.name === 'total' ? translate('category_total_balance')
+              : category.name === 'perday' ? translate('transaction_filter_daily_average')
+                : category.name === 'no-category' ? translate('no_category') : category.name}
+          </AText>
+          <ASkeleton loading={loading}>
+            <AText fontSize={summary ? 15 : 12} bold color={category.difference > 0 ? colors.brandSuccess : category.difference < 0 ? colors.brandDanger : colors.text} textAlign="right" numberOfLines={1} adjustsFontSizeToFit>
+              {category.difference > 0 ? '+' : ''}
+              {localNumberFormat(category.currencyCode, category.difference)}
+            </AText>
+          </ASkeleton>
+        </View>
+        {category.name !== 'perday' && <IncomeExpenseBar income={category.income} incomeTotal={scale} expense={category.expense} expenseTotal={scale} currencyCode={category.currencyCode} loading={loading} barHeight={summary ? 7 : 5} />}
+      </View>
     );
   };
 
   return (
     <AScrollView
       showsVerticalScrollIndicator={false}
-      style={{ paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
-      refreshControl={(
-        <RefreshControl
-          refreshing={false}
-          onRefresh={() => Promise.all([
-            dispatch.categories.getInsightCategories(),
-            dispatch.firefly.getNetWorth(),
-          ])}
-        />
-      )}
+      style={{ paddingHorizontal: 16, paddingBottom: 24 }}
+      refreshControl={<RefreshControl refreshing={false} onRefresh={() => Promise.all([dispatch.categories.getInsightCategories(), dispatch.firefly.getNetWorth()])} />}
     >
-      <AStack mx={15} my={10} row justifyContent="space-between" alignItems="center">
-        <AText fontSize={25} bold>
-          {expensesOnly ? translate('home_expense_categories') : translate('home_all_categories')}
-        </AText>
-        <Switch thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} onValueChange={onSwitch} value={expensesOnly} />
-      </AStack>
-      {[insightCategoriesPerDay, insightCategoriesTotal, ...insightCategories].map((category, index) => {
-        if (!category || (expensesOnly && category.expense >= 0)) {
-          return null;
-        }
+      <View style={{
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8,
+      }}
+      >
+        <AText fontSize={18} bold>{translate('navigation_categories_tab')}</AText>
 
-        return (
-          <TouchableOpacity
-            key={category.id}
-            onPress={() => {
-              if (category.name === 'total' || category.name === 'perday') return;
-              if (category.name === 'no-category') {
-                goToTransactions(category.id, 'has_any_category:false');
-              } else {
-                goToTransactions(category.id, `category_is:"${category.name}"`);
-              }
-            }}
-          >
-            <AView
-              key={category.name}
-              style={{
-                borderColor: category.name === 'total' ? colors.dividerColor : colors.listBorderColor,
-                borderBottomWidth: index - 1 === insightCategories.length ? 0 : 1,
-                paddingBottom: !expensesOnly && category.name === 'total' ? 10 : 0,
-              }}
-            >
-              <AStack
-                row
-                mx={15}
-                style={{
-                  height: 45,
-                }}
-                justifyContent="space-between"
-              >
-                <AText
-                  fontSize={category.name === 'perday' ? 12 : 14}
-                  maxWidth="60%"
-                  numberOfLines={1}
-                  bold={(category.name === 'total' || category.name === 'perday')}
-                >
-                  {(category.name === 'no-category') ? translate('no_category') : ''}
-                  {(category.name === 'total') ? translate(expensesOnly ? 'category_total_spent' : 'category_total_balance') : ''}
-                  {(category.name === 'perday') ? translate(expensesOnly ? 'category_perday_spent' : 'category_perday_balance') : ''}
-                  {(category.name !== 'no-category' && category.name !== 'total' && category.name !== 'perday') ? category.name : null}
-                </AText>
-
-                <ASkeleton loading={loading}>
-                  <AText
-                    fontSize={category.name === 'perday' ? 12 : 14}
-                    maxWidth={100}
-                    numberOfLines={1}
-                    bold={(category.name === 'total' || category.name === 'perday')}
-                    color={!expensesOnly ? category.difference > 0 ? colors.brandSuccess : category.difference < 0 ? colors.brandDanger : colors.text : colors.text}
-                  >
-                    {localNumberFormat(
-                      category.currencyCode,
-                      expensesOnly ? category.expense * -1 : category.difference,
-                    )}
-                  </AText>
-                </ASkeleton>
-              </AStack>
-              {!expensesOnly && category.name !== 'perday' && insightCategoriesTotal && (
-                <IncomeExpenseBar
-                  income={category.income}
-                  incomeTotal={category.name === 'total' ? insightCategoriesTotal.income - insightCategoriesTotal.expense : insightCategoriesTotal.income}
-                  expense={category.expense}
-                  expenseTotal={category.name === 'total' ? insightCategoriesTotal.income - insightCategoriesTotal.expense : insightCategoriesTotal.expense}
-                  currencyCode={category.currencyCode}
-                  loading={loading}
-                  barHeight={category.name === 'total' ? 10 : undefined}
-                />
-              )}
-            </AView>
-          </TouchableOpacity>
-        );
-      })}
+      </View>
+      {total && renderRow(total, true)}
+      <View style={{
+        flexDirection: 'row', justifyContent: 'space-between', paddingTop: 7, paddingBottom: 2,
+      }}
+      >
+        <AText fontSize={10} color={colors.greyLight}>{translate('home_expenses')}</AText>
+        <AText fontSize={10} color={colors.greyLight}>{translate('home_income')}</AText>
+      </View>
+      {rows.map((category) => (
+        <Pressable key={category.id} accessibilityRole="button" onPress={() => openCategory(category.name === 'no-category' ? NO_CATEGORY : category.name)}>
+          {renderRow(category)}
+        </Pressable>
+      ))}
+      {perDay && renderRow(perDay, true)}
+      {!loading && rows.length === 0 && <AText fontSize={13} py={24} textAlign="center">{translate('transaction_filter_no_results')}</AText>}
     </AScrollView>
   );
 }
 
 function InsightBudgets() {
+  const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
   const tabBarHeight = useBottomTabBarHeight();
   const insightBudgets = useSelector((state: RootState) => state.budgets.budgets);
@@ -369,7 +256,7 @@ function InsightBudgets() {
         />
       )}
     >
-      <AText fontSize={25} lineHeight={27} style={{ margin: 15 }} bold>
+      <AText fontSize={18} lineHeight={22} style={{ margin: 8 }} bold>
         {translate('home_budgets')}
       </AText>
       {insightBudgets.filter((budget) => budget.attributes?.active).map((budget) => (
@@ -383,7 +270,7 @@ function InsightBudgets() {
               style={{ maxWidth: '80%' }}
               alignItems="flex-start"
             >
-              <AText fontSize={14} lineHeight={22} numberOfLines={1}>
+              <AText fontSize={13} lineHeight={22} numberOfLines={1}>
                 {budget.attributes.name}
               </AText>
               <AText fontSize={12} lineHeight={20} numberOfLines={1}>
@@ -434,6 +321,7 @@ function formatDate(date) {
 }
 
 function Bills() {
+  const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
   const tabBarHeight = useBottomTabBarHeight();
   const bills = useSelector((state: RootState) => state.bills.bills);
@@ -458,7 +346,7 @@ function Bills() {
         />
       )}
     >
-      <AText fontSize={25} lineHeight={27} style={{ margin: 15 }} bold>
+      <AText fontSize={18} lineHeight={22} style={{ margin: 8 }} bold>
         {translate('home_bills')}
       </AText>
       {bills.map((bill) => {
@@ -486,7 +374,7 @@ function Bills() {
                 style={{ maxWidth: '80%' }}
                 alignItems="flex-start"
               >
-                <AText fontSize={14} lineHeight={22} numberOfLines={1}>
+                <AText fontSize={13} lineHeight={22} numberOfLines={1}>
                   {bill.attributes.name}
                 </AText>
                 <AText fontSize={12} lineHeight={20} numberOfLines={1}>
@@ -530,6 +418,7 @@ function Bills() {
 }
 
 function PiggyBanks() {
+  const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
   const tabBarHeight = useBottomTabBarHeight();
   const piggyBanks = useSelector((state: RootState) => state.piggyBanks.piggyBanks);
@@ -550,7 +439,7 @@ function PiggyBanks() {
         />
       )}
     >
-      <AText fontSize={25} lineHeight={27} style={{ margin: 15 }} bold>
+      <AText fontSize={18} lineHeight={22} style={{ margin: 8 }} bold>
         {translate('home_piggy_banks')}
       </AText>
       {piggyBanks.filter((pb) => pb.attributes?.percentage).map((pb) => (
@@ -566,7 +455,7 @@ function PiggyBanks() {
               style={{ maxWidth: '80%' }}
               alignItems="flex-start"
             >
-              <AText fontSize={14} lineHeight={22} numberOfLines={1}>
+              <AText fontSize={13} lineHeight={22} numberOfLines={1}>
                 {pb.attributes.name}
               </AText>
               <AText fontSize={12} lineHeight={20} numberOfLines={1}>
@@ -609,227 +498,121 @@ function PiggyBanks() {
 }
 
 function NetWorth() {
-  const { colors } = useThemeColors();
+  const localNumberFormat = usePrivateNumberFormat();
+  const { colors, colorScheme } = useThemeColors();
   const hideBalance = useSelector((state: RootState) => state.configuration.hideBalance);
   const netWorth = useSelector((state: RootState) => state.firefly.netWorth);
-  const balance = useSelector((state: RootState) => state.firefly.balance);
-  const spent = useSelector((state: RootState) => state.firefly.earned);
-  const earned = useSelector((state: RootState) => state.firefly.spent);
+  const earned = useSelector((state: RootState) => state.firefly.earned);
+  const spent = useSelector((state: RootState) => state.firefly.spent);
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
   const loading = useSelector((state: RootState) => state.loading.effects.firefly.getNetWorth?.loading);
-  const dispatch = useDispatch<RootDispatch>();
 
-  return useMemo(() => (
-    <View testID="home_screen_net_worth">
-      <Pressable onPress={() => dispatch.configuration.setHideBalance(!hideBalance)}>
-        {!hideBalance && (
-          <AView style={{
-            height: 90,
-            width: 300,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          >
-            <AText fontSize={12} lineHeight={18}>
-              {`${translate('home_net_worth')} • ${currentCode}`}
+  return (
+    <View testID="home_screen_net_worth" style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 9 }}>
+      <View>
+        <LinearGradient
+          colors={colorScheme === 'dark' ? ['#523B88', '#7054AB'] : ['#7052C4', '#946DDD']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ borderRadius: 14, padding: 12 }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <AText fontSize={12} color="#F1E9FF">{translate('home_net_worth')}</AText>
+          </View>
+          <ASkeleton loading={loading}>
+            <AText fontSize={27} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} py={5}>
+              {hideBalance ? '••••••' : localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
             </AText>
+          </ASkeleton>
+        </LinearGradient>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 7 }}>
+        {[{ label: 'home_income', data: earned, color: colors.brandSuccess }, { label: 'home_expenses', data: spent, color: colors.brandDanger }].map((metric) => (
+          <View
+            key={metric.label}
+            style={{
+              flex: 1, borderRadius: 10, backgroundColor: colors.tileBackgroundColor, borderWidth: 1, borderColor: colors.listBorderColor, padding: 8,
+            }}
+          >
+            <AText fontSize={11} color={colors.greyLight}>{translate(metric.label)}</AText>
             <ASkeleton loading={loading}>
-              <AText
-                fontSize={35}
-                lineHeight={37}
-                bold
-                numberOfLines={1}
-                maxWidth="90%"
-                textAlign="center"
-                adjustsFontSizeToFit
-                minimumFontScale={0.6}
-              >
-                {localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
+              <AText fontSize={16} color={metric.color} bold py={5} numberOfLines={1} adjustsFontSizeToFit>
+                {hideBalance ? '••••' : localNumberFormat(currentCode, Math.abs(parseFloat(metric.data[0]?.monetaryValue || '0')))}
               </AText>
             </ASkeleton>
-
-            {balance && balance[0] && earned && earned[0] && spent && spent[0] && !hideBalance && (
-              <ASkeleton loading={loading}>
-                <AStack
-                  py={0}
-                  my={1}
-                  px={5}
-                  backgroundColor={parseFloat(balance[0].monetaryValue) < 0 ? colors.brandNeutralLight : colors.brandSuccessLight}
-                  style={{ borderRadius: 5 }}
-                >
-                  <AText
-                    py={0}
-                    bold
-                    fontSize={12}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                    textAlign="center"
-                    color={parseFloat(balance[0].monetaryValue) < 0 ? colors.brandNeutral : colors.brandSuccess}
-                  >
-                    {`${parseFloat(balance[0].monetaryValue) > 0 ? '+' : ''}${localNumberFormat(balance[0].currencyCode, parseFloat(balance[0].monetaryValue))}`}
-                  </AText>
-                </AStack>
-              </ASkeleton>
-            )}
-          </AView>
-        )}
-
-        {hideBalance && (
-          <AView style={{
-            height: 90,
-            width: 300,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          >
-            <FontAwesome
-              name={hideBalance ? 'eye-slash' : 'eye'}
-              size={30}
-              color={colors.text}
-            />
-          </AView>
-        )}
-      </Pressable>
+          </View>
+        ))}
+      </View>
     </View>
-  ), [
-    loading,
-    hideBalance,
-    colors,
-    netWorth,
-    balance,
-    earned,
-    spent,
-    currentCode,
-  ]);
+  );
+}
+
+export function CategoriesScreen() {
+  const rangeDetails = useSelector((state: RootState) => state.firefly.rangeDetails);
+  const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
+  const dispatch = useDispatch<RootDispatch>();
+  useFocusEffect(useCallback(() => {
+    dispatch.categories.getInsightCategories().catch(() => {});
+  }, [dispatch, rangeDetails.start, rangeDetails.end, currentCode]));
+  return <ErrorBoundary><InsightCategories /></ErrorBoundary>;
 }
 
 export default function HomeScreen() {
-  const { colors, colorScheme } = useThemeColors();
-  const safeAreaInsets = useSafeAreaInsets();
+  const { colors } = useThemeColors();
   const start = useSelector((state: RootState) => state.firefly.rangeDetails.start);
   const end = useSelector((state: RootState) => state.firefly.rangeDetails.end);
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
   const dispatch = useDispatch<RootDispatch>();
-  const selectedTheme = useSelector((state: RootState) => state.configuration.selectedTheme || 'gradientOrange');
-  const lightSelectedColor = colors[`${selectedTheme}Light`] || colors.gradientOrangeLight;
-  const darkSelectedColor = colors[`${selectedTheme}Dark`] || colors.gradientOrangeDark;
-  const gradientColors = colorScheme === 'light' ? lightSelectedColor : darkSelectedColor;
-
-  const renderIcons = [
-    <Ionicons key="wallet" name="wallet" size={22} color={colors.text} />,
-    <Ionicons key="pricetag" name="pricetags" size={22} color={colors.text} />,
-    <MaterialCommunityIcons key="progress-check" name="progress-check" size={22} color={colors.text} />,
-    <Ionicons key="calendar-clear" name="calendar-clear" size={22} color={colors.text} />,
-    <MaterialCommunityIcons key="piggy-bank" name="piggy-bank" size={22} color={colors.text} />,
-  ];
+  const viewPagerRef = useRef<PagerView>(null);
+  const [selectedPage, setSelectedPage] = useState(0);
+  const pages = ['home_accounts', 'transaction_form_category_label', 'home_budgets', 'home_bills', 'home_piggy_banks'];
 
   useEffect(() => {
-    (async () => {
-      await Promise.all([
-        dispatch.currencies.getCurrencies(),
-        dispatch.configuration.getCurrentApiVersion(),
-      ]);
-    })();
-  }, []);
+    Promise.all([dispatch.currencies.getCurrencies(), dispatch.configuration.getCurrentApiVersion()]).catch(() => {});
+  }, [dispatch]);
 
-  const prevFiltersRef = useRef<string>(null);
-  const viewPagerRef = useRef<PagerView>(null);
-  const scrollRef = useRef(null);
+  useFocusEffect(useCallback(() => {
+    if (axios.defaults.headers.Authorization) {
+      Promise.all([
+        dispatch.firefly.getNetWorth(),
+        dispatch.accounts.getAccounts(),
+        dispatch.categories.getInsightCategories(),
+        dispatch.budgets.getInsightBudgets(),
+        dispatch.bills.getBills(),
+        dispatch.piggyBanks.getPiggyBanks(),
+      ]).catch(() => {});
+    }
+  }, [dispatch, start, end, currentCode]));
 
-  useScrollToTop(scrollRef);
-
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-
-      const fetchData = () => {
-        if (isActive && axios.defaults.headers.Authorization) {
-          dispatch.firefly.getNetWorth();
-          dispatch.accounts.getAccounts();
-          dispatch.categories.getInsightCategories();
-          dispatch.budgets.getInsightBudgets();
-          dispatch.bills.getBills();
-          dispatch.piggyBanks.getPiggyBanks();
-        }
-      };
-
-      if (prevFiltersRef.current !== `${start}-${end}-${currentCode}`) {
-        fetchData();
-        prevFiltersRef.current = `${start}-${end}-${currentCode}`;
-      }
-
-      return () => {
-        isActive = false;
-      };
-    }, [start, end, currentCode]),
-  );
-
-  const scrollOffsetAnimatedValue = React.useRef(new Animated.Value(0)).current;
-  const positionAnimatedValue = React.useRef(new Animated.Value(0)).current;
-
-  return (useMemo(() => (
-    <AView style={{ flex: 1 }}>
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.backgroundColor }}>
       <ErrorBoundary>
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 0 }}
-          style={{ minHeight: 250 + safeAreaInsets.top, paddingTop: safeAreaInsets.top }}
-        >
-          <AStackFlex>
-            <NetWorth />
-            <Pagination
-              renderIcons={renderIcons}
-              handlePress={(index) => viewPagerRef?.current?.setPage(index)}
-              scrollOffsetAnimatedValue={scrollOffsetAnimatedValue}
-              positionAnimatedValue={positionAnimatedValue}
-            />
-          </AStackFlex>
-        </LinearGradient>
-
-        <View style={{ flex: 1 }}>
-          <AView
-            style={{
-              backgroundColor: colors.tileBackgroundColor,
-              borderTopLeftRadius: 30,
-              borderTopRightRadius: 30,
-              borderColor: colors.tileBackgroundColor,
-              paddingTop: 5,
-              position: 'absolute',
-              top: -55,
-              height: '150%',
-              right: 0,
-              left: 0,
-            }}
-          >
-            <AnimatedPagerView
-              ref={viewPagerRef}
-              initialPage={0}
-              style={{ flex: 1 }}
-              onPageScroll={Animated.event<PagerViewOnPageScrollEventData>(
-                [
-                  {
-                    nativeEvent: {
-                      offset: scrollOffsetAnimatedValue,
-                      position: positionAnimatedValue,
-                    },
-                  },
-                ],
-                {
-                  useNativeDriver: true,
-                },
-              )}
-            >
-              <AssetsAccounts key="1" />
-              <InsightCategories key="2" />
-              <InsightBudgets key="3" />
-              <Bills key="4" />
-              <PiggyBanks key="5" />
-            </AnimatedPagerView>
-          </AView>
+        <NetWorth />
+        <View style={{ paddingBottom: 8 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 6 }}>
+            {pages.map((label, index) => (
+              <Pressable
+                key={label}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: selectedPage === index }}
+                onPress={() => { setSelectedPage(index); viewPagerRef.current?.setPage(index); }}
+                style={{
+                  backgroundColor: selectedPage === index ? colors.brandStyle : colors.tileBackgroundColor, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 7,
+                }}
+              >
+                <AText fontSize={11} color={selectedPage === index ? 'white' : colors.greyLight} bold>{translate(label)}</AText>
+              </Pressable>
+            ))}
+          </ScrollView>
         </View>
+        <PagerView ref={viewPagerRef} initialPage={0} style={{ flex: 1 }} onPageSelected={(event) => setSelectedPage(event.nativeEvent.position)}>
+          <View key="accounts" style={{ flex: 1 }} collapsable={false}><AssetsAccounts /></View>
+          <View key="categories" style={{ flex: 1 }} collapsable={false}><InsightCategories /></View>
+          <View key="budgets" style={{ flex: 1 }} collapsable={false}><InsightBudgets /></View>
+          <View key="bills" style={{ flex: 1 }} collapsable={false}><Bills /></View>
+          <View key="piggy" style={{ flex: 1 }} collapsable={false}><PiggyBanks /></View>
+        </PagerView>
       </ErrorBoundary>
-    </AView>
-  ), [colors]));
+    </View>
+  );
 }

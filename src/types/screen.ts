@@ -3,6 +3,8 @@ import { TransactionSplitType } from '../models/transactions';
 interface filterScreenParamsType {
   filterType: string;
   selectFilter: (filter: string) => void;
+  filterKind?: 'category' | 'tag';
+  selected?: string;
 }
 export interface NavigationType {
   dispatch: (action) => void;
@@ -27,6 +29,11 @@ export interface ScreenType {
       filterType?: string;
       transactionSearch?: string;
       startDate?: Date;
+      endDate?: Date;
+      category?: string;
+      transactionType?: '' | 'withdrawal' | 'deposit' | 'transfer';
+      filterKind?: 'category' | 'tag';
+      selected?: string;
       selectFilter?: (filter: string) => void;
     }
   }

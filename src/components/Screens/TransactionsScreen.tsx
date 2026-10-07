@@ -4,6 +4,7 @@ import React, {
   useLayoutEffect,
   useEffect,
   useState,
+  useRef,
 } from 'react';
 import {
   ActivityIndicator,
@@ -13,7 +14,6 @@ import {
 import moment from 'moment';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import {
-  EvilIcons,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -27,10 +27,11 @@ import {
 } from '@react-navigation/native';
 
 import { SearchBarCommands } from 'react-native-screens';
-import { GetTransactionsPayload, TransactionSplitType, TransactionType } from '../../models/transactions';
+import usePrivateNumberFormat from '../../lib/use-private-number-format';
+import { TransactionSplitType, TransactionType } from '../../models/transactions';
 import { RootDispatch, RootState } from '../../store';
 import translate from '../../i18n/locale';
-import { D_WIDTH, localNumberFormat, useThemeColors } from '../../lib/common';
+import { D_WIDTH, useThemeColors } from '../../lib/common';
 import { ScreenType } from '../../types/screen';
 import {
   APressable, AScrollView, AStackFlex, AText, AView,
@@ -39,7 +40,7 @@ import AFilterButton from '../UI/ALibrary/AFilterButton';
 import AButton from '../UI/ALibrary/AButton';
 import ADateFilterButton from '../UI/ALibrary/ADateFilterButton';
 
-const ITEM_HEIGHT = 90;
+const ITEM_HEIGHT = 60;
 
 const resetTransactionsDates = (transactions: TransactionSplitType[]) => transactions.map((t) => ({
   ...t,
@@ -77,10 +78,12 @@ function ListFooterComponent({ onLoadMore, initLoading }) {
     totalPages,
     loading,
     initLoading,
+    onLoadMore,
   ]);
 }
 
 function RenderItem({ item }) {
+  const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
   const navigation = useNavigation();
 
@@ -106,25 +109,25 @@ function RenderItem({ item }) {
   const colorItemTypes = {
     withdrawal: {
       bg: colors.brandNeutralLight,
-      color: colors.brandNeutral,
+      color: colors.red,
       icon: 'arrow-down',
       prefix: '-',
     },
     deposit: {
       bg: colors.brandSuccessLight,
-      color: colors.brandSuccess,
+      color: colors.green,
       icon: 'arrow-up',
       prefix: '+',
     },
     transfer: {
       bg: colors.brandInfoLight,
-      color: colors.brandInfo,
+      color: colors.blue,
       icon: 'arrow-left-right',
       prefix: '',
     },
     'opening balance': {
       bg: colors.brandNeutralLight,
-      color: colors.brandNeutral,
+      color: colors.red,
       icon: 'arrow-left-right',
       prefix: '',
     },
@@ -173,66 +176,38 @@ function RenderItem({ item }) {
           >
             <MaterialCommunityIcons
               name={getTransactionTypeAttributes(item.attributes.transactions[0].type).icon}
-              size={24}
+              size={19}
               color={getTransactionTypeAttributes(item.attributes.transactions[0].type).color}
             />
           </AView>
-          <AStackFlex alignItems="flex-start" py={7}>
-            <AText fontSize={14} maxWidth={D_WIDTH - 175} numberOfLines={1} bold>
+          <AStackFlex alignItems="flex-start" py={5}>
+            <AText fontSize={12} maxWidth={D_WIDTH - 150} numberOfLines={1} bold>
               {item.attributes.groupTitle}
               {item.attributes.groupTitle?.length > 0 ? ': ' : ''}
               {item.attributes.transactions[0].description}
             </AText>
 
-            <AText fontSize={12} maxWidth={D_WIDTH - 175} numberOfLines={1}>
-              {item.attributes.transactions[0].type === 'withdrawal'
-                ? item.attributes.transactions[0].sourceName
-                : item.attributes.transactions[0].destinationName}
+            <AText fontSize={10} maxWidth={D_WIDTH - 150} numberOfLines={1}>
+              {item.attributes.transactions[0].type === 'withdrawal' ? item.attributes.transactions[0].sourceName : item.attributes.transactions[0].destinationName}
+              {item.attributes.transactions[0].categoryName ? ` · ${item.attributes.transactions[0].categoryName}` : ''}
             </AText>
-
-            <AText fontSize={12} maxWidth={D_WIDTH - 175} numberOfLines={1}>
-              {`${moment(item.attributes.transactions[0].date).format('LT')}${
-                item.attributes.transactions[0].categoryName
-                  ? ` • ${item.attributes.transactions[0].categoryName}`
-                  : ''
-              }`}
+            <AText fontSize={9} color={colors.greyLight} maxWidth={D_WIDTH - 150} numberOfLines={1}>
+              {moment(item.attributes.transactions[0].date).format('HH:mm')}
+              {item.attributes.transactions[0].tags.map((tag) => ` #${tag}`).join('')}
             </AText>
-            {item.attributes.transactions[0].tags.length > 0 && (
-              <AStackFlex justifyContent="flex-start" alignItems="flex-start" row>
-                {item.attributes.transactions[0].tags.filter((_, index) => index < 2).map((tag) => (
-                  <AView
-                    key={tag}
-                    style={{
-                      height: 15,
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderRadius: 4,
-                      paddingHorizontal: 2,
-                      paddingVertical: 0,
-                      backgroundColor: colors.brandNeutralFix,
-                      marginHorizontal: 2,
-                    }}
-                  >
-                    <EvilIcons name="tag" size={15} color={colors.brandDark} />
-                    <AText fontSize={10} color={colors.brandDark} numberOfLines={1} maxWidth={100} bold>{tag}</AText>
-                  </AView>
-                ))}
-              </AStackFlex>
-            )}
           </AStackFlex>
         </AStackFlex>
         <AView
           style={{
             borderRadius: 10,
             backgroundColor: getTransactionTypeAttributes(item.attributes.transactions[0].type).bg,
-            margin: 10,
-            marginTop: 15,
-            padding: 5,
+            margin: 6,
+            marginTop: 9,
+            padding: 3,
           }}
         >
           <AText
-            fontSize={15}
+            fontSize={13}
             color={getTransactionTypeAttributes(item.attributes.transactions[0].type).color}
             bold
             numberOfLines={1}
@@ -327,7 +302,13 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
   const defaultStart = useSelector((state: RootState) => state.firefly.rangeDetails.start);
   const [start, setStartDate] = useState<Date>(new Date(`${defaultStart}T12:00:00`));
   const defaultEnd = useSelector((state: RootState) => state.firefly.rangeDetails.end);
-  const [end] = useState<Date>(new Date(`${defaultEnd}T12:00:00`));
+  const [end, setEndDate] = useState<Date>(new Date(`${defaultEnd}T12:00:00`));
+  const [category, setCategory] = useState('');
+  const [tag, setTag] = useState('');
+  const [searchDraft, setSearchDraft] = useState('');
+  const [loadError, setLoadError] = useState(false);
+  const loadGeneration = useRef(0);
+  const loadingMore = useRef(false);
   const [account, setAccount] = useState<string>('');
   const [type, setType] = useState<'' | 'withdrawal' | 'deposit' | 'transfer'>('');
   const [currentCode, setCurrentCode] = useState('');
@@ -339,34 +320,47 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     },
   } = useDispatch<RootDispatch>();
 
-  const searchBarRef = React.useRef<SearchBarCommands>();
-  const onLoadMore = async () => {
-    const payload: GetTransactionsPayload = {
-      start,
-      end,
-      type,
-      currentCode,
-      account,
-      search,
-    };
-    const effectTransactions = await getMoreTransactions(payload);
-    setTransactions([...transactions, ...effectTransactions]);
-  };
-
-  const onLoad = async () => {
-    const payload: GetTransactionsPayload = {
-      start,
-      end,
-      type,
-      currentCode,
-      account,
-      search,
-    };
+  const searchBarRef = React.useRef<SearchBarCommands>(null);
+  const onLoad = useCallback(async () => {
+    loadGeneration.current += 1;
+    const generation = loadGeneration.current;
     setLoading(true);
-    const effectTransactions = await getTransactions(payload);
-    setTransactions(effectTransactions);
-    setLoading(false);
-  };
+    setLoadError(false);
+    try {
+      const result = await getTransactions({
+        start, end, type, currentCode, account, category, tag, search,
+      });
+      if (generation === loadGeneration.current) setTransactions(result);
+    } catch (error) {
+      if (generation === loadGeneration.current) {
+        setTransactions([]);
+        setLoadError(true);
+      }
+    } finally {
+      if (generation === loadGeneration.current) setLoading(false);
+    }
+  }, [getTransactions, start, end, type, currentCode, account, category, tag, search]);
+
+  const onLoadMore = useCallback(async () => {
+    if (loading || loadingMore.current) return;
+    const generation = loadGeneration.current;
+    loadingMore.current = true;
+    try {
+      const result = await getMoreTransactions({
+        start, end, type, currentCode, account, category, tag, search,
+      });
+      if (generation === loadGeneration.current) setTransactions((previous) => [...previous, ...result]);
+    } catch (error) {
+      if (generation === loadGeneration.current) setLoadError(true);
+    } finally {
+      loadingMore.current = false;
+    }
+  }, [getMoreTransactions, loading, start, end, type, currentCode, account, category, tag, search]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setSearch(searchDraft), 300);
+    return () => clearTimeout(timeout);
+  }, [searchDraft]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -377,59 +371,53 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
         headerIconColor: colors.text,
         textColor: colors.text,
         hintTextColor: colors.text,
-        onChangeText: (event) => setSearch(event.nativeEvent.text),
-        onBlur: () => onLoad(),
-        onSearchButtonPress: () => onLoad(),
+        onChangeText: (event) => setSearchDraft(event.nativeEvent.text),
+        onBlur: () => setSearch(searchDraft),
+        onSearchButtonPress: () => setSearch(searchDraft),
         disableBackButtonOverride: true,
         shouldShowHintSearchIcon: false,
       },
     });
-    // set search bar on first screen open
-    if (params?.transactionSearch !== undefined) {
-      const p = { ...params };
-      setTimeout(() => {
-        setSearch(p?.transactionSearch);
-        searchBarRef.current?.focus();
-        searchBarRef.current?.setText(p?.transactionSearch);
-        searchBarRef.current?.blur();
-      }, 500);
-    }
-  }, [navigation, search]);
-
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-
-      if (params?.forceRefresh === true) {
-        if (isActive) {
-          onLoad().catch();
-          navigation.setParams({ forceRefresh: false });
-        }
-      }
-
-      if (params?.transactionSearch !== undefined) {
-        setSearch(params?.transactionSearch);
-        searchBarRef.current?.focus();
-        searchBarRef.current?.setText(params?.transactionSearch);
-        searchBarRef.current?.blur();
-        // disabled
-        params.transactionSearch = undefined;
-      }
-
-      if (params?.startDate !== undefined) {
-        setStartDate(params.startDate);
-        params.startDate = undefined;
-      }
-
-      return () => {
-        isActive = false;
-      };
-    }, [params, currentCode, type]),
-  );
+  }, [navigation, colors.text, searchDraft]);
 
   useEffect(() => {
-    onLoad().catch();
-  }, [type, currentCode, start, account]);
+    if (params?.transactionSearch !== undefined) {
+      setSearch(params.transactionSearch);
+      setSearchDraft(params.transactionSearch);
+      searchBarRef.current?.setText(params.transactionSearch);
+      navigation.setParams({ transactionSearch: undefined });
+    }
+    if (params?.category !== undefined) {
+      setCategory(params.category);
+      setTag('');
+      setAccount('');
+      setSearch('');
+      setSearchDraft('');
+      searchBarRef.current?.clearText();
+      navigation.setParams({ category: undefined });
+    }
+    if (params?.transactionType !== undefined) {
+      setType(params.transactionType);
+      navigation.setParams({ transactionType: undefined });
+    }
+    if (params?.startDate !== undefined) {
+      setStartDate(new Date(params.startDate));
+      navigation.setParams({ startDate: undefined });
+    }
+    if (params?.endDate !== undefined) {
+      setEndDate(new Date(params.endDate));
+      navigation.setParams({ endDate: undefined });
+    }
+    if (params?.forceRefresh) {
+      onLoad();
+      navigation.setParams({ forceRefresh: false });
+    }
+  }, [params, navigation, onLoad]);
+
+  useFocusEffect(useCallback(() => {
+    onLoad();
+    return () => { loadGeneration.current += 1; };
+  }, [onLoad]));
 
   const closeRow = (rowKey: string | number, rowMap: { [x: string]: { closeRow: () => void; }; }) => {
     if (rowMap[rowKey]) {
@@ -437,9 +425,13 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     }
   };
 
-  const deleteRow = (id: string) => {
-    deleteTransaction(id);
-    setTransactions((prevState) => prevState.filter((item) => item.id !== id));
+  const deleteRow = async (id: string) => {
+    try {
+      await deleteTransaction(id);
+      setTransactions((prevState) => prevState.filter((item) => item.id !== id));
+    } catch (error) {
+      setLoadError(true);
+    }
   };
 
   const goToDuplicate = (payload: { splits: TransactionSplitType[]; groupTitle: string; }) => navigation.dispatch(
@@ -456,7 +448,12 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     setCurrentCode('');
     setSearch('');
     setAccount('');
+    setCategory('');
+    setTag('');
+    setSearchDraft('');
+    searchBarRef.current?.clearText();
     setStartDate(new Date(`${defaultStart}T12:00:00`));
+    setEndDate(new Date(`${defaultEnd}T12:00:00`));
   };
 
   const transactionSections = useMemo(
@@ -487,13 +484,14 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={(
         <RefreshControl
-          refreshing={false}
+          refreshing={loading}
           onRefresh={onLoad}
         />
       )}
       ListHeaderComponent={(
-        <AStackFlex row backgroundColor={colors.tileBackgroundColor} py={5}>
-          {(type !== '' || currentCode !== '' || account !== '') && (
+        <AView>
+          <AStackFlex row backgroundColor={colors.tileBackgroundColor} py={8}>
+            {(type !== '' || currentCode !== '' || account !== '' || category !== '' || tag !== '' || search !== '') && (
             <AView
               style={{
                 justifyContent: 'center',
@@ -503,17 +501,29 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
                 marginHorizontal: 5,
               }}
             >
-              <Ionicons onPress={resetFilters} name="close-circle" size={24} color={colors.text} />
+              <Ionicons onPress={resetFilters} name="close-circle" size={19} color={colors.text} />
             </AView>
+            )}
+            <AScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ADateFilterButton currentDate={start} selectDate={(date: Date) => { setStartDate(date); setEndDate(moment(date).endOf('month').toDate()); }} />
+              <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
+              <AFilterButton filterKind="category" filterType={translate('transaction_form_category_label')} selected={category} selectFilter={setCategory} navigation={navigation} />
+              <AFilterButton filterKind="tag" filterType={translate('transaction_form_tags_label')} selected={tag} selectFilter={setTag} navigation={navigation} />
+              <AFilterButton filterType={translate('currency')} selected={currentCode} selectFilter={(selected) => setCurrentCode(selected)} navigation={navigation} />
+              <AFilterButton filterType={translate('home_accounts')} selected={account} selectFilter={(selected) => setAccount(selected)} navigation={navigation} />
+            </AScrollView>
+          </AStackFlex>
+          {loadError && (
+          <AView style={{ padding: 16 }}>
+            <AText fontSize={13}>{translate('transaction_filter_load_error')}</AText>
+            <AButton style={{ height: 44, marginTop: 12 }} onPress={onLoad}>
+              <AText fontSize={14}>{translate('transaction_filter_retry')}</AText>
+            </AButton>
+          </AView>
           )}
-          <AScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <ADateFilterButton currentDate={start} selectDate={(date: Date) => setStartDate(date)} />
-            <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
-            <AFilterButton filterType={translate('currency')} selected={currentCode} selectFilter={(selected) => setCurrentCode(selected)} navigation={navigation} />
-            <AFilterButton filterType={translate('home_accounts')} selected={account} selectFilter={(selected) => setAccount(selected)} navigation={navigation} />
-          </AScrollView>
-        </AStackFlex>
+        </AView>
       )}
+      ListEmptyComponent={!loading && !loadError ? <AText py={30} fontSize={14} textAlign="center">{translate('transaction_filter_no_results')}</AText> : null}
       initialNumToRender={15}
       keyExtractor={(item: TransactionType) => item.id}
       sections={!loading ? transactionSections : []}

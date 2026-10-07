@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-  NativeSyntheticEvent,
   TextInput,
-  TextInputFocusEventData,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { AStyle } from './types';
@@ -21,11 +19,12 @@ type AInputType = {
   placeholder?: string
   value?: string
   onChangeText?: (text: string) => void
-  onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void
-  onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void
+  onFocus?: React.ComponentProps<typeof TextInput>['onFocus']
+  onBlur?: React.ComponentProps<typeof TextInput>['onBlur']
   InputLeftElement?: React.ReactNode
   InputRightElement?: React.ReactNode
   textAlign?: 'left' | 'center' | 'right'
+  color?: string
   fontSize?: number
   numberOfLines?: number
   style?: AStyle
@@ -48,23 +47,24 @@ export default function AInput({
   InputLeftElement = null,
   InputRightElement = null,
   textAlign = 'left',
+  color,
   fontSize = 14,
   numberOfLines = 1,
   style = null,
 }: AInputType) {
   const { colors } = useThemeColors();
   const [isFocused, setIsFocused] = React.useState(false);
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
   const handleFocus = (focusState: boolean, callback: () => void) => {
     setIsFocused(focusState);
     callback();
   };
 
   const selectedBrandStyleWithAlpha = (hexColor, alpha) => {
-    const color = hexColor.replace('#', '');
-    const r = parseInt(color.substring(0, 2), 16);
-    const g = parseInt(color.substring(2, 4), 16);
-    const b = parseInt(color.substring(4, 6), 16);
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
@@ -93,14 +93,14 @@ export default function AInput({
           fontSize,
           textAlign,
           fontFamily: bold ? 'Montserrat-Bold' : 'Montserrat-Regular',
-          color: colors.text,
+          color: color || colors.text,
           paddingVertical: 5,
           ...style,
         }}
-        cursorColor={colors.listBorderColor}
+        cursorColor={selectedBrandStyle}
         returnKeyType={returnKeyType}
         keyboardType={keyboardType}
-        placeholderTextColor={colors.listBorderColor}
+        placeholderTextColor={colors.greyLight}
         onChangeText={onChangeText}
         numberOfLines={numberOfLines}
         value={value}

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#7554d5">
+  <title>Abacus · Demo Perspectiva</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <main class="demo-shell">
+    <div class="demo-banner">DEMO INTERACTIVA · DATOS DE EJEMPLO</div>
+    <div class="phone visual" id="app"></div>
+  </main>
+  <dialog class="demo-dialog" id="confirmation"><h3>Movimiento de ejemplo</h3><p>Esta demo muestra cómo funcionará el formulario. No se ha enviado ninguna operación a Firefly III.</p><button id="close-dialog">Entendido</button></dialog>
+  <dialog class="demo-dialog" id="entry-actions"><h3>Acciones del movimiento</h3><button data-action="duplicate-entry">Duplicar</button><button data-action="delete-entry" class="danger-action">Eliminar</button><button data-action="cancel-actions" class="neutral-action">Cancelar</button></dialog>
+  <dialog class="demo-dialog" id="delete-confirmation"><h3>¿Eliminar el movimiento?</h3><p>Solo se eliminará de los datos de ejemplo de esta sesión.</p><button data-action="confirm-delete" class="danger-action">Eliminar</button><button data-action="cancel-delete" class="neutral-action">Cancelar</button></dialog>
+  <dialog class="demo-dialog" id="month-dialog"><div id="month-options"></div></dialog>
+  <script src="demo.js"></script>
+</body>
+</html>

@@ -39,9 +39,9 @@ describe('changing transaction type without leaving the form', () => {
         apiPost: jest.fn().mockResolvedValue({ data: { id: '1' } }),
       },
     };
-    const effects = transactions.effects(dispatch as never);
+    const upsertTransaction = transactions.effects(dispatch as never).upsertTransaction.bind({} as never);
     const split = expense();
-    await effects.upsertTransaction({ id: '-1' }, {
+    await upsertTransaction({ id: '-1' }, {
       transactions: { transactionPayload: { title: '', transactions: [split] } },
     });
     const income = {
@@ -50,7 +50,7 @@ describe('changing transaction type without leaving the form', () => {
       sourceId: 40,
       amount: '1850,00',
     };
-    await effects.upsertTransaction({ id: '-1' }, {
+    await upsertTransaction({ id: '-1' }, {
       transactions: { transactionPayload: { title: '', transactions: [income] } },
     });
     expect(dispatch.configuration.apiPost).toHaveBeenCalledTimes(2);

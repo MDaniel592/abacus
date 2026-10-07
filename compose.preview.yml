@@ -1,0 +1,11 @@
+name: abacus-preview
+
+services:
+  preview:
+    image: nginx:latest
+    container_name: abacus-design-preview
+    restart: unless-stopped
+    ports:
+      - "8095:80"
+    volumes:
+      - ./design:/usr/share/nginx/html:ro

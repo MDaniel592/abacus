@@ -1,6 +1,7 @@
 import { createModel } from '@rematch/core';
 import { AxiosResponse } from 'axios';
 import { RootModel } from './index';
+import transactionSearch from '../lib/transaction-search';
 
 export type TransactionSplitType = {
   order?: number
@@ -69,6 +70,8 @@ export type GetTransactionsPayload = {
   end?: Date
   currentCode?: string
   account?: string
+  category?: string
+  tag?: string
 }
 
 export const initialSplit = () => ({
@@ -112,6 +115,8 @@ const INITIAL_STATE = {
   totalPages: 1,
   transactionPayload: null,
 } as TransactionStateType;
+
+let searchGeneration = 0;
 
 export default createModel<RootModel>()({
 
@@ -228,41 +233,31 @@ export default createModel<RootModel>()({
 
   effects: (dispatch) => ({
     async getTransactions(payload: GetTransactionsPayload): Promise<TransactionType[]> {
-      const {
-        type,
-        start,
-        account,
-        currentCode,
-        search: searchQuery,
-      } = payload;
-
+      searchGeneration += 1;
+      const generation = searchGeneration;
       const currentPage = 1;
-      const todayInOneMonth = new Date();
-      todayInOneMonth.setMonth(new Date().getMonth() + 1);
-      const inOneMonth = todayInOneMonth.toISOString().split('T')[0];
-      let search = searchQuery || ' ';
-      search += ` date_after:${start.toISOString().split('T')[0]} date_before:${inOneMonth}`;
-      search += (currentCode) ? ` currency_is:${currentCode}` : '';
-      search += (type) ? ` type:${type}` : '';
-      search += (account) ? ` account_contains:"${account}"` : '';
+      const query = encodeURIComponent(transactionSearch(payload));
 
       const {
         data: transactions,
         meta,
-      } = await dispatch.configuration.apiFetch({ url: `/api/v1/search/transactions?limit=15&page=${currentPage}&query=${search}` }) as {
+      } = await dispatch.configuration.apiFetch({ url: `/api/v1/search/transactions?limit=15&page=${currentPage}&query=${query}` }) as {
         data: TransactionType[],
         meta
       };
 
-      dispatch.transactions.setMetaPagination({
-        page: meta.pagination.currentPage,
-        totalPages: meta.pagination.totalPages,
-      });
+      if (generation === searchGeneration) {
+        dispatch.transactions.setMetaPagination({
+          page: meta.pagination.currentPage,
+          totalPages: meta.pagination.totalPages,
+        });
+      }
 
       return transactions;
     },
 
     async getMoreTransactions(payload: GetTransactionsPayload, rootState): Promise<TransactionType[]> {
+      const generation = searchGeneration;
       const {
         transactions: {
           page = 1,
@@ -270,37 +265,24 @@ export default createModel<RootModel>()({
         },
       } = rootState;
 
-      const {
-        type,
-        start,
-        account,
-        currentCode,
-        search: searchQuery,
-      } = payload;
-
-      const currentPage = (page < totalPages) ? page + 1 : 1;
       if (page < totalPages) {
-        const todayInOneMonth = new Date();
-        todayInOneMonth.setMonth(new Date().getMonth() + 1);
-        const inOneMonth = todayInOneMonth.toISOString().split('T')[0];
-        let search = searchQuery || ' ';
-        search += ` date_after:${start.toISOString().split('T')[0]} date_before:${inOneMonth}`;
-        search += (currentCode) ? ` currency_is:${currentCode}` : '';
-        search += (type) ? ` type:${type}` : '';
-        search += (account) ? ` account_contains:"${account}"` : '';
+        const currentPage = page + 1;
+        const query = encodeURIComponent(transactionSearch(payload));
 
         const {
           data: transactions,
           meta,
-        } = await dispatch.configuration.apiFetch({ url: `/api/v1/search/transactions?limit=15&page=${currentPage}&query=${search}` }) as {
+        } = await dispatch.configuration.apiFetch({ url: `/api/v1/search/transactions?limit=15&page=${currentPage}&query=${query}` }) as {
           data: TransactionType[],
           meta
         };
 
-        dispatch.transactions.setMetaPagination({
-          page: meta.pagination.currentPage,
-          totalPages: meta.pagination.totalPages,
-        });
+        if (generation === searchGeneration) {
+          dispatch.transactions.setMetaPagination({
+            page: meta.pagination.currentPage,
+            totalPages: meta.pagination.totalPages,
+          });
+        }
 
         return transactions;
       }

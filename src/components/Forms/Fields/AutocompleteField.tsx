@@ -36,6 +36,7 @@ export default function AutocompleteField({
   onDeleteMultiple = null,
   multiple = false,
   small = false,
+  compact = false,
 }) {
   const { colors } = useThemeColors();
   const backendURL = useSelector((state: RootState) => state.configuration.backendURL);
@@ -107,9 +108,9 @@ export default function AutocompleteField({
   };
 
   return (
-    <AFormView>
+    <AFormView style={compact ? { marginTop: 7 } : null}>
       {!small && (
-      <ALabel isRequired={isRequired}>
+      <ALabel isRequired={isRequired} fontSize={compact ? 12 : 14}>
         {label}
       </ALabel>
       )}
@@ -139,7 +140,8 @@ export default function AutocompleteField({
       )))}
 
       <AInput
-        height={40}
+        height={compact ? 34 : 40}
+        fontSize={compact ? 12 : 14}
         returnKeyType="done"
         onSubmitEditing={({ nativeEvent: { text } }) => ((multiple && text !== '') ? handleSelectAutocomplete({ name: text }) : null)}
         placeholder={placeholder}

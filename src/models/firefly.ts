@@ -58,49 +58,16 @@ export type RangeDetailsType = {
   end: string;
 };
 
-const formatDateToYYYYMMDD = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-};
-
-const getCurrentQuarterStartDate = (): string => {
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth();
-  const quarterStartMonth = Math.floor(currentMonth / 3) * 3;
-  const startDate = new Date(currentYear, quarterStartMonth, 1);
-
-  return formatDateToYYYYMMDD(startDate);
-};
-
-const getCurrentQuarterEndDate = (): string => {
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth();
-  const quarterEndMonth = Math.floor(currentMonth / 3) * 3 + 2;
-  const lastDayOfMonth = new Date(
-    currentYear,
-    quarterEndMonth + 1,
-    0,
-  ).getDate();
-  const endDate = new Date(currentYear, quarterEndMonth, lastDayOfMonth);
-
-  return formatDateToYYYYMMDD(endDate);
-};
-
 const INITIAL_STATE = {
   rangeDetails: {
     title: generateRangeTitle(
-      3,
-      getCurrentQuarterStartDate(),
-      getCurrentQuarterEndDate(),
+      1,
+      moment().startOf('month').format('YYYY-MM-DD'),
+      moment().endOf('month').format('YYYY-MM-DD'),
     ),
-    range: 3,
-    start: getCurrentQuarterStartDate(),
-    end: getCurrentQuarterEndDate(),
+    range: 1,
+    start: moment().startOf('month').format('YYYY-MM-DD'),
+    end: moment().endOf('month').format('YYYY-MM-DD'),
   },
   netWorth: [],
   spent: [],
@@ -167,7 +134,10 @@ export default createModel<RootModel>()({
 
       const rangeInt = parseInt(range, 10);
 
-      if (direction !== undefined) {
+      if (payload.monthStart && moment(payload.monthStart, 'YYYY-MM-DD', true).isValid()) {
+        start = moment(payload.monthStart).startOf('month').format('YYYY-MM-DD');
+        end = moment(payload.monthStart).endOf('month').format('YYYY-MM-DD');
+      } else if (direction !== undefined) {
         if (direction > 0) {
           start = moment(oldStart).add(rangeInt, 'M').format('YYYY-MM-DD');
           end = moment(oldEnd)

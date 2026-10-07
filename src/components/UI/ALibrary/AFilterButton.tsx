@@ -6,6 +6,7 @@ import { AText, AView } from './index';
 import { NavigationType } from '../../../types/screen';
 import { useThemeColors } from '../../../lib/common';
 import translate from '../../../i18n/locale';
+import { NO_CATEGORY } from '../../../lib/transaction-search';
 
 interface AFilterButtonType {
   filterType: string;
@@ -13,6 +14,7 @@ interface AFilterButtonType {
   selected: string;
   selectFilter: (filter: string) => void;
   capitalize?: boolean;
+  filterKind?: 'category' | 'tag';
 }
 
 export default function AFilterButton({
@@ -21,6 +23,7 @@ export default function AFilterButton({
   filterType,
   selectFilter,
   capitalize = false,
+  filterKind,
 }: AFilterButtonType) {
   const { colors } = useThemeColors();
 
@@ -29,6 +32,8 @@ export default function AFilterButton({
       onPress={() => navigation.navigate('FilterScreen', {
         filterType,
         selectFilter,
+        filterKind,
+        selected,
       })}
     >
       <AView
@@ -44,7 +49,7 @@ export default function AFilterButton({
         }}
       >
         <AText fontSize={15} bold capitalize={capitalize}>
-          {filterType === translate('transaction_type_label') && selected !== '' ? translate(`transaction_form_type_${selected}`) : selected || filterType}
+          {selected === NO_CATEGORY ? translate('no_category') : filterType === translate('transaction_type_label') && selected !== '' ? translate(`transaction_form_type_${selected}`) : selected || filterType}
         </AText>
         <Ionicons name="chevron-down-outline" size={15} color={colors.text} />
       </AView>

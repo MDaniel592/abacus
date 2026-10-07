@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import {
-  Keyboard, Platform, KeyboardAvoidingView, ScrollView, Switch, ActivityIndicator,
+  Keyboard, Platform, KeyboardAvoidingView, ScrollView, Switch, ActivityIndicator, View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Haptics from 'expo-haptics';
@@ -31,6 +31,7 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
   const displayForeignCurrency = useSelector((state: RootState) => state.configuration.displayForeignCurrency);
   const [splitNumber, setSplitNumber] = useState<string[]>([]);
   const dispatch = useDispatch<RootDispatch>();
+  const [showOptions, setShowOptions] = useState(splits.length > 1 || Boolean(title) || displayForeignCurrency);
 
   useEffect(() => {
     setSplitNumber(splits.length ? splits.map(() => Crypto.randomUUID()) : [Crypto.randomUUID()]);
@@ -68,25 +69,33 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
           handleDelete={() => deleteTransactionSplit(i)}
         />
       ))}
-      <AButton
-        style={{
-          height: 48,
-          marginTop: 5,
-          borderWidth: 0.5,
-          borderColor: colors.listBorderColor,
-        }}
-        onPress={addTransactionSplit}
-      >
-        <AStackFlex row>
-          <Ionicons name="add-circle" size={22} color={colors.greyLight} style={{ margin: 5 }} />
-          <AText color={colors.greyLight} fontSize={15}>{translate('transaction_form_new_split_button')}</AText>
-        </AStackFlex>
+      <AButton type="transparent" style={{ height: 36, marginTop: 4 }} onPress={() => setShowOptions((value) => !value)}>
+        <AText fontSize={12} color={colors.greyLight}>{translate('transaction_form_more_options')}</AText>
+        <Ionicons name={showOptions ? 'chevron-up' : 'chevron-down'} size={15} color={colors.greyLight} style={{ marginLeft: 6 }} />
       </AButton>
-      {splitNumber.length > 1 && <GroupTitle title={title || ''} />}
-      <AStackFlex row py={10} alignItems="center" justifyContent="space-between">
-        <AText color={colors.greyLight} fontSize={14} bold>{translate('transaction_form_foreign_currency_label')}</AText>
-        <Switch thumbColor="white" trackColor={{ false: '#767577', true: colors.brandStyle }} onValueChange={onSwitch} value={displayForeignCurrency} />
-      </AStackFlex>
+      {showOptions && (
+      <>
+        <AButton
+          style={{
+            height: 40,
+            marginTop: 5,
+            borderWidth: 0.5,
+            borderColor: colors.listBorderColor,
+          }}
+          onPress={addTransactionSplit}
+        >
+          <AStackFlex row>
+            <Ionicons name="add-circle" size={22} color={colors.greyLight} style={{ margin: 5 }} />
+            <AText color={colors.greyLight} fontSize={13}>{translate('transaction_form_new_split_button')}</AText>
+          </AStackFlex>
+        </AButton>
+        {(splitNumber.length > 1 || title) && <GroupTitle title={title || ''} />}
+        <AStackFlex row py={10} alignItems="center" justifyContent="space-between">
+          <AText color={colors.greyLight} fontSize={13} bold>{translate('transaction_form_foreign_currency_label')}</AText>
+          <Switch thumbColor="white" trackColor={{ false: '#767577', true: colors.brandStyle }} onValueChange={onSwitch} value={displayForeignCurrency} />
+        </AStackFlex>
+      </>
+      )}
     </AView>
   );
 }
@@ -95,10 +104,10 @@ function TransactionFormButtons({ handleSubmit }) {
   const loading = useSelector((state: RootState) => state.loading.effects.transactions.upsertTransaction?.loading);
 
   return (
-    <AButton type="primary" loading={loading} disabled={loading} style={{ height: 52, marginTop: 12 }} onPress={handleSubmit}>
+    <AButton type="primary" loading={loading} disabled={loading} style={{ height: 44, marginBottom: 0 }} onPress={handleSubmit}>
       <AStackFlex row>
         <Ionicons name="cloud-upload-sharp" size={20} color="white" style={{ margin: 5 }} />
-        <AText color="white" fontSize={15}>{translate('transaction_form_submit_button')}</AText>
+        <AText color="white" fontSize={13}>{translate('transaction_form_submit_button')}</AText>
       </AStackFlex>
     </AButton>
   );
@@ -156,13 +165,18 @@ export default function TransactionForm({
         style={{
           flex: 1,
         }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: 10, paddingBottom: 12 }}
         keyboardShouldPersistTaps="handled"
         bounces={false}
       >
         <MultipleTransactionSplitForm isNew={id === '-1'} title={title} splits={splits} />
-        <TransactionFormButtons handleSubmit={handleSubmit} />
       </ScrollView>
+      <View style={{
+        paddingHorizontal: 12, paddingVertical: 10, borderTopWidth: 0.5, borderColor: colors.listBorderColor, backgroundColor: colors.tileBackgroundColor,
+      }}
+      >
+        <TransactionFormButtons handleSubmit={handleSubmit} />
+      </View>
     </KeyboardAvoidingView>
   );
 }

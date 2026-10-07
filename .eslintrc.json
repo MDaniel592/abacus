@@ -40,6 +40,33 @@
           "off"
         ]
       }
+    },
+    {
+      "files": [
+        "**/*.js"
+      ],
+      "parserOptions": {
+        "project": null
+      },
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": [
+        "design/*.js"
+      ],
+      "env": {
+        "browser": true
+      },
+      "rules": {
+        "@typescript-eslint/no-use-before-define": [
+          "error",
+          {
+            "functions": false
+          }
+        ]
+      }
     }
   ],
   "rules": {

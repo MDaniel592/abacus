@@ -1,6 +1,8 @@
+import { useSelector } from 'react-redux';
 import { Dimensions, Platform, useColorScheme } from 'react-native';
 import { getLocales } from 'expo-localization';
 import moment from 'moment/moment';
+import type { RootState } from '../store';
 import colors from '../constants/colors';
 import translate from '../i18n/locale';
 import { TCredential } from '../types/credential';
@@ -66,7 +68,9 @@ export const localNumberFormat = (currencyCode: string, num: number | bigint) =>
 };
 
 export const useThemeColors = () => {
-  const colorScheme = useColorScheme();
+  const systemScheme = useColorScheme();
+  const preferredScheme = useSelector((state: RootState) => state.configuration.preferredColorScheme);
+  const colorScheme = preferredScheme || systemScheme || 'light';
 
   return {
     colors: { ...colors, ...colors[colorScheme] },

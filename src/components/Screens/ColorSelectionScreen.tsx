@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  TouchableOpacity, StyleSheet, Dimensions, useColorScheme,
+  TouchableOpacity, StyleSheet, Dimensions,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { RootDispatch, RootState } from '../../store';
 import colors from '../../constants/colors';
+import { useThemeColors } from '../../lib/common';
 import { AScrollView, AView } from '../UI/ALibrary';
 
 const themes = [
@@ -75,10 +76,10 @@ const styles = StyleSheet.create({
 });
 
 export default function ColorSelectionScreen() {
-  const currentTheme = useSelector((state: RootState) => state.configuration.selectedTheme || 'gradientOrange');
+  const currentTheme = useSelector((state: RootState) => state.configuration.selectedTheme || 'gradientPurple');
   const dispatch = useDispatch<RootDispatch>();
   const navigation = useNavigation();
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useThemeColors();
   const highlightColor = colorScheme === 'dark' ? 'white' : 'black';
 
   const handleColorSelect = (theme: string) => {

@@ -22,7 +22,7 @@ export default function Filters() {
   const range = useSelector((state: RootState) => state.firefly.rangeDetails.range);
   const accounts = useSelector((state: RootState) => state.accounts.accounts);
   const selectedAccountIds = useSelector((state: RootState) => state.accounts.selectedAccountIds);
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
   const {
     firefly: {
       setRange,

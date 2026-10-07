@@ -1,7 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
+import usePrivateNumberFormat from '../../lib/use-private-number-format';
 import { ASkeleton, AStack, AText } from './ALibrary';
-import { localNumberFormat, useThemeColors } from '../../lib/common';
+import { useThemeColors } from '../../lib/common';
 
 type IncomeExpenseBarPropType = {
   income: number,
@@ -22,9 +23,11 @@ function IncomeExpenseBar({
   loading,
   barHeight = 5,
 }: IncomeExpenseBarPropType) {
+  const localNumberFormat = usePrivateNumberFormat();
+  const hidden = localNumberFormat(currencyCode, 0) === '••••';
   const { colors } = useThemeColors();
-  const incomePercentage = loading ? 0 : income && incomeTotal ? (income / incomeTotal) * 100 : 0;
-  const expensePercentage = loading ? 0 : Math.abs(expense && expenseTotal ? (expense / expenseTotal) * 100 : 0);
+  const incomePercentage = loading || hidden ? 0 : income && incomeTotal ? Math.min(100, Math.max(0, (income / incomeTotal) * 100)) : 0;
+  const expensePercentage = loading || hidden ? 0 : Math.min(100, Math.abs(expense && expenseTotal ? (expense / expenseTotal) * 100 : 0));
   return (
     <AStack
       row

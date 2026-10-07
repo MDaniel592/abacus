@@ -7,6 +7,7 @@ import colors from '../constants/colors';
 
 type ConfigurationStateType = {
   backendURL: string
+  preferredColorScheme?: 'light' | 'dark' | null
   hideBalance: boolean
   displayAllAccounts: boolean
   displayOnlyExpenseCategories: boolean
@@ -54,8 +55,8 @@ const INITIAL_STATE = {
   apiVersion: '',
   serverVersion: '',
   closeTransactionScreen: false,
-  selectedTheme: 'gradientOrange',
-  selectedBrandStyle: colors.brandStyleOrange,
+  selectedTheme: 'gradientPurple',
+  selectedBrandStyle: colors.brandStyle,
 } as ConfigurationStateType;
 
 export default createModel<RootModel>()({
@@ -85,6 +86,9 @@ export default createModel<RootModel>()({
       };
     },
 
+    setPreferredColorScheme(state, preferredColorScheme: 'light' | 'dark' | null): ConfigurationStateType {
+      return { ...state, preferredColorScheme };
+    },
     setHideBalance(state, hideBalance: boolean): ConfigurationStateType {
       return {
         ...state,

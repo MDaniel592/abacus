@@ -32,7 +32,7 @@ export default function ADateFilterButton({
           style={{ flex: 1 }}
           onChange={(event, value) => {
             setShowDatePicker(Platform.OS === 'ios');
-            selectDate(value);
+            if (event.type === 'set' && value) selectDate(value);
           }}
         />
       )}

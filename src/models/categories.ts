@@ -36,7 +36,7 @@ const dateDiffInDays = (start, end) => {
   const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
   const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
 
-  return Math.floor((utc2 - utc1) / _MS_PER_DAY) + 1;
+  return Math.max(1, Math.floor((utc2 - utc1) / _MS_PER_DAY) + 1);
 };
 
 export default createModel<RootModel>()({

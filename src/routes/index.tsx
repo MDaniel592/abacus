@@ -8,15 +8,14 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
-  BottomTabBar,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import {
   AntDesign,
-  Foundation,
+  Ionicons,
 } from '@expo/vector-icons';
 import {
-  StyleSheet, Platform, View, Pressable,
+  Platform, View, Pressable,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import {
@@ -27,11 +26,10 @@ import translate from '../i18n/locale';
 import { useThemeColors } from '../lib/common';
 
 // Screens
-import HomeScreen from '../components/Screens/HomeScreen';
+import HomeScreen, { CategoriesScreen } from '../components/Screens/HomeScreen';
 import FiltersScreen from '../components/Screens/FiltersScreen';
 import FilterScreen from '../components/Screens/FilterScreen';
 import CredentialCreateScreen from '../components/Screens/CredentialCreateScreen';
-import ChartScreen from '../components/Screens/ChartScreen';
 import TransactionCreateScreen from '../components/Screens/TransactionCreateScreen';
 import TransactionsScreen from '../components/Screens/TransactionsScreen';
 import TransactionDetailScreen from '../components/Screens/TransactionDetailScreen';
@@ -59,13 +57,16 @@ const Tab = createBottomTabNavigator();
 function TabBarPrimaryButton() {
   const navigation = useNavigation();
   const { colors } = useThemeColors();
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
 
   return (
-    <AStack justifyContent="flex-start">
+    <AStack justifyContent="center" style={{ flex: 1 }}>
       <AIconButton
         testID="navigation_create_transaction"
         backgroundColor={selectedBrandStyle}
+        style={{
+          width: 44, height: 44, borderRadius: 14,
+        }}
         icon={<AntDesign name="plus" color="white" size={22} />}
         onPress={() => navigation.dispatch(
           CommonActions.navigate({
@@ -77,10 +78,10 @@ function TabBarPrimaryButton() {
   );
 }
 
-function TabBarChartScreenIcon({ color }) {
+function TabBarCategoriesScreenIcon({ color }) {
   return (
-    <AntDesign
-      name="line-chart"
+    <Ionicons
+      name="grid-outline"
       size={20}
       color={color}
     />
@@ -89,8 +90,8 @@ function TabBarChartScreenIcon({ color }) {
 
 function TabBarHomeScreenIcon({ color }) {
   return (
-    <Foundation
-      name="home"
+    <Ionicons
+      name="home-outline"
       size={24}
       color={color}
     />
@@ -99,8 +100,8 @@ function TabBarHomeScreenIcon({ color }) {
 
 function TabBarTransactionScreenIcon({ color }) {
   return (
-    <AntDesign
-      name="bars"
+    <Ionicons
+      name="swap-horizontal-outline"
       size={25}
       color={color}
     />
@@ -109,8 +110,8 @@ function TabBarTransactionScreenIcon({ color }) {
 
 function TabBarConfigurationScreenIcon({ color }) {
   return (
-    <AntDesign
-      name="setting"
+    <Ionicons
+      name="options-outline"
       size={22}
       color={color}
     />
@@ -225,7 +226,7 @@ function PrimaryButtonComponent() {
 
 function Home() {
   const { colors } = useThemeColors();
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
 
   return (
     <ErrorBoundary>
@@ -240,15 +241,15 @@ function Home() {
           tabBarShowLabel: true,
           tabBarLazyLoad: true,
           tabBarStyle: {
-            backgroundColor: Platform.select({ ios: 'transparent', android: colors.tileBackgroundColor }),
-            borderTopWidth: 0,
-            marginTop: 10,
+            backgroundColor: colors.tileBackgroundColor,
+            borderTopWidth: 0.5,
+            borderTopColor: colors.listBorderColor,
             elevation: 0,
           },
           tabBarLabelStyle: {
             fontSize: 10,
             fontFamily: 'Montserrat-Regular',
-            paddingBottom: 10,
+            paddingBottom: 4,
           },
         })}
       >
@@ -259,21 +260,21 @@ function Home() {
             headerShown: true,
             // eslint-disable-next-line react/no-unstable-nested-components
             header: ({ navigation }) => <NavigationHeader navigation={navigation} />,
-            headerTransparent: true,
+            headerTransparent: false,
             tabBarIcon: TabBarHomeScreenIcon,
             tabBarTestID: 'navigation_home_tab',
           }}
         />
         <Tab.Screen
-          name={translate('navigation_chart_tab')}
-          component={ChartScreen}
+          name={translate('navigation_categories_tab')}
+          component={CategoriesScreen}
           options={{
             headerShown: true,
             // eslint-disable-next-line react/no-unstable-nested-components
             header: ({ navigation }) => <NavigationHeader navigation={navigation} />,
-            headerTransparent: true,
-            tabBarIcon: TabBarChartScreenIcon,
-            tabBarTestID: 'navigation_chart_tab',
+            headerTransparent: false,
+            tabBarIcon: TabBarCategoriesScreenIcon,
+            tabBarTestID: 'navigation_categories_tab',
           }}
         />
         <Tab.Screen

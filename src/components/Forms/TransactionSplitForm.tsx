@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import moment from 'moment/moment';
 import { Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useDispatch, useSelector } from 'react-redux';
-import { getLocales } from 'expo-localization';
 
 import translate from '../../i18n/locale';
 import { useThemeColors } from '../../lib/common';
@@ -31,7 +30,6 @@ export default function TransactionSplitForm({
   handleDelete,
   transaction,
 }) {
-  const [locale] = getLocales();
   const displayForeignCurrency = useSelector((state: RootState) => state.configuration.displayForeignCurrency);
   const dispatch = useDispatch<RootDispatch>();
   const { colorScheme, colors } = useThemeColors();
@@ -41,12 +39,9 @@ export default function TransactionSplitForm({
     amount: transaction.amount ? parseFloat(transaction.amount).toFixed(2) : '',
     foreignAmount: transaction.foreignAmount ? parseFloat(transaction.foreignAmount).toFixed(2) : '',
   });
-  const [showDatePicker, setShowDatePicker] = useState(Platform.OS === 'ios');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [showDetails, setShowDetails] = useState(!isNew || Boolean(
-    transaction.categoryName || transaction.budgetName || transaction.billName
-    || transaction.tags?.length || transaction.notes,
-  ));
+  const [hasCustomTime, setHasCustomTime] = useState(!isNew);
 
   const setTransaction = (data: TransactionSplitType) => {
     setData(data);
@@ -96,19 +91,19 @@ export default function TransactionSplitForm({
     <AStack
       justifyContent="flex-start"
       alignItems="flex-start"
-      backgroundColor={colors.tileBackgroundColor}
-      py={10}
-      my={5}
+      backgroundColor={colors.backgroundColor}
+      py={6}
+      my={0}
       style={{
         borderColor: colors.listBorderColor,
-        borderWidth: 0.5,
-        borderRadius: 10,
+        borderWidth: 0,
+        borderRadius: 0,
       }}
     >
       {index !== 0 && (
         <AStack style={{ width: '100%', paddingHorizontal: 10 }} justifyContent="space-between" row>
           <AText
-            fontSize={15}
+            fontSize={14}
             color={colors.greyLight}
             textAlign="center"
             style={{
@@ -148,7 +143,7 @@ export default function TransactionSplitForm({
               }}
               style={{
                 flex: 1,
-                height: 48,
+                height: 40,
                 borderTopLeftRadius: (i === 0) ? 10 : 0,
                 borderBottomLeftRadius: (i === 0) ? 10 : 0,
                 borderTopRightRadius: (i === 2) ? 10 : 0,
@@ -160,7 +155,7 @@ export default function TransactionSplitForm({
                 borderColor: colors.listBorderColor,
               }}
             >
-              <AText fontSize={14} textAlign="center" color={type === formData.type ? 'white' : colors.text} bold capitalize>{translate(keyName)}</AText>
+              <AText fontSize={13} textAlign="center" color={type === formData.type ? 'white' : colors.text} bold capitalize>{translate(keyName)}</AText>
             </APressable>
           ))}
         </AStack>
@@ -173,19 +168,49 @@ export default function TransactionSplitForm({
         </ALabel>
         <AInput
           bold
-          height={90}
+          height={50}
           returnKeyType="done"
           keyboardType="decimal-pad"
           placeholder="0.00"
           value={formData.amount}
-          fontSize={35}
+          fontSize={27}
+          textAlign="center"
+          color={colorItemTypes[formData.type]}
           onChangeText={(value) => setTransaction({
             ...formData,
             amount: value,
           })}
-          InputRightElement={deleteBtn(['amount'])}
-          InputLeftElement={(<AText px={10} fontSize={25} bold>{`${formData.currencySymbol}`}</AText>)}
+          InputRightElement={<AStack style={{ width: 36 }}><AText textAlign="center" fontSize={19} bold>{formData.currencySymbol}</AText></AStack>}
+          InputLeftElement={<AStack style={{ width: 36 }}>{null}</AStack>}
         />
+      </AFormView>
+
+      <AFormView>
+        <AStack row justifyContent="center" style={{ width: '100%', height: 40 }}>
+          <AButton px={6} onPress={() => setShowDatePicker(true)} style={{ height: 38, borderWidth: 0 }}>
+            <AText fontSize={16}>{moment(formData.date).locale('es').format('D MMM YYYY').replace('.', '')}</AText>
+          </AButton>
+          <AButton px={6} onPress={() => setShowTimePicker(true)} style={{ height: 38, borderWidth: 0 }}>
+            <AText fontSize={15}>{hasCustomTime ? moment(formData.date).format('HH:mm') : translate('transaction_form_add_time')}</AText>
+          </AButton>
+          {(showDatePicker || showTimePicker) && (
+            <DateTimePicker
+              accentColor={colors.brandDark}
+              themeVariant={colorScheme}
+              mode={showTimePicker ? 'time' : 'date'}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              value={new Date(formData.date)}
+              onChange={(event, value) => {
+                if (event.type === 'set' && value) {
+                  if (showTimePicker) setHasCustomTime(true);
+                  setTransaction({ ...formData, date: value });
+                }
+                setShowDatePicker(false);
+                setShowTimePicker(false);
+              }}
+            />
+          )}
+        </AStack>
       </AFormView>
 
       {displayForeignCurrency && (
@@ -200,7 +225,7 @@ export default function TransactionSplitForm({
           placeholder="0.00"
           value={formData.foreignAmount}
           textAlign="center"
-          fontSize={20}
+          fontSize={19}
           onChangeText={(value) => setTransaction({
             ...formData,
             foreignAmount: value,
@@ -220,74 +245,8 @@ export default function TransactionSplitForm({
       </AFormView>
       )}
 
-      <AFormView>
-        <ALabel isRequired>
-          {translate('transaction_form_date_label')}
-        </ALabel>
-        <AStack row style={{ width: '100%', height: 40 }}>
-          {showDatePicker && (
-          <DateTimePicker
-            accentColor={colors.brandDark}
-            themeVariant={colorScheme}
-            locale={locale.languageCode}
-            mode={Platform.select({ android: 'date', ios: 'datetime' })}
-            style={{ width: 250 }}
-            value={(formData.date instanceof Date) ? formData.date : new Date(formData.date)}
-            onChange={(event, value) => {
-              setShowDatePicker(Platform.OS === 'ios');
-              if (event.type === 'set' && value) {
-                setTransaction({ ...formData, date: value });
-              }
-            }}
-          />
-          )}
-          {showTimePicker && Platform.OS === 'android' && (
-          <DateTimePicker
-            accentColor={colors.brandDark}
-            themeVariant={colorScheme}
-            mode="time"
-            style={{ width: 250, alignSelf: 'center' }}
-            value={(formData.date instanceof Date) ? formData.date : new Date(formData.date)}
-            onChange={(event, value) => {
-              setShowTimePicker(false);
-              if (event.type === 'set' && value) {
-                setTransaction({ ...formData, date: value });
-              }
-            }}
-          />
-          )}
-          {Platform.OS === 'android' && (
-          <AStack row>
-            <AButton
-              mx={10}
-              px={10}
-              onPress={() => setShowDatePicker(true)}
-              style={{
-                height: 40,
-                borderWidth: 0.5,
-                borderColor: colors.listBorderColor,
-              }}
-            >
-              <AText fontSize={14}>{moment(formData.date).format('ll')}</AText>
-            </AButton>
-            <AButton
-              mx={10}
-              px={10}
-              onPress={() => setShowTimePicker(true)}
-              style={{
-                height: 40,
-                borderWidth: 0.5,
-                borderColor: colors.listBorderColor,
-              }}
-            >
-              <AText fontSize={14}>{moment(formData.date).format('hh:mm a')}</AText>
-            </AButton>
-          </AStack>
-          )}
-        </AStack>
-      </AFormView>
-
       <AutocompleteField
+        compact
         isRequired
         label={translate('transaction_form_description_label')}
         placeholder={translate('transaction_form_description_label')}
@@ -307,6 +266,7 @@ export default function TransactionSplitForm({
       />
 
       <AutocompleteField
+        compact
         key={`source-${formData.type}`}
         isRequired={['withdrawal', 'transfer'].includes(formData.type)}
         label={translate('transaction_form_sourceAccount_label')}
@@ -335,6 +295,7 @@ export default function TransactionSplitForm({
       />
 
       <AutocompleteField
+        compact
         key={`destination-${formData.type}`}
         isRequired={['deposit', 'transfer'].includes(formData.type)}
         label={translate('transaction_form_destinationAccount_label')}
@@ -363,108 +324,99 @@ export default function TransactionSplitForm({
         routeApi="accounts"
       />
 
-      <AButton
-        type="transparent"
-        style={{ height: 48, marginHorizontal: 10, marginTop: 12 }}
-        onPress={() => setShowDetails((value) => !value)}
-      >
-        <AText fontSize={14} bold>{translate('transaction_form_optional_details')}</AText>
-        <Ionicons name={showDetails ? 'chevron-up' : 'chevron-down'} size={18} color={colors.text} style={{ marginLeft: 8 }} />
-      </AButton>
+      <AutocompleteField
+        compact
+        label={translate('transaction_form_category_label')}
+        placeholder={translate('transaction_form_category_label')}
+        value={formData.categoryName}
+        onChangeText={(value) => setTransaction({
+          ...formData,
+          categoryName: value,
+          categoryId: '',
+        })}
+        onSelectAutocomplete={(autocomplete) => setTransaction({
+          ...formData,
+          categoryId: autocomplete.id,
+          categoryName: autocomplete.name,
+        })}
+        InputRightElement={deleteBtn(['categoryId', 'categoryName'])}
+        routeApi="categories"
+      />
 
-      {showDetails && (
-        <>
-          <AutocompleteField
-            label={translate('transaction_form_category_label')}
-            placeholder={translate('transaction_form_category_label')}
-            value={formData.categoryName}
-            onChangeText={(value) => setTransaction({
-              ...formData,
-              categoryName: value,
-              categoryId: '',
-            })}
-            onSelectAutocomplete={(autocomplete) => setTransaction({
-              ...formData,
-              categoryId: autocomplete.id,
-              categoryName: autocomplete.name,
-            })}
-            InputRightElement={deleteBtn(['categoryId', 'categoryName'])}
-            routeApi="categories"
-          />
+      <AutocompleteField
+        compact
+        label={translate('transaction_form_budget_label')}
+        placeholder={translate('transaction_form_budget_label')}
+        value={formData.budgetName}
+        onChangeText={(value: string) => setTransaction({
+          ...formData,
+          budgetName: value,
+          budgetId: '',
+        })}
+        onSelectAutocomplete={(autocomplete) => setTransaction({
+          ...formData,
+          budgetId: autocomplete.id,
+          budgetName: autocomplete.name,
+        })}
+        InputRightElement={deleteBtn(['budgetId', 'budgetName'])}
+        routeApi="budgets"
+      />
 
-          <AutocompleteField
-            label={translate('transaction_form_budget_label')}
-            placeholder={translate('transaction_form_budget_label')}
-            value={formData.budgetName}
-            onChangeText={(value: string) => setTransaction({
-              ...formData,
-              budgetName: value,
-              budgetId: '',
-            })}
-            onSelectAutocomplete={(autocomplete) => setTransaction({
-              ...formData,
-              budgetId: autocomplete.id,
-              budgetName: autocomplete.name,
-            })}
-            InputRightElement={deleteBtn(['budgetId', 'budgetName'])}
-            routeApi="budgets"
-          />
+      <AutocompleteField
+        compact
+        label={translate('transaction_form_bill_label')}
+        placeholder={translate('transaction_form_bill_label')}
+        value={formData.billName}
+        onChangeText={(value: string) => setTransaction({
+          ...formData,
+          billName: value,
+          billId: '',
+        })}
+        onSelectAutocomplete={(autocomplete) => setTransaction({
+          ...formData,
+          billId: autocomplete.id,
+          billName: autocomplete.name,
+        })}
+        InputRightElement={deleteBtn(['billId', 'billName'])}
+        routeApi="bills"
+      />
 
-          <AutocompleteField
-            label={translate('transaction_form_bill_label')}
-            placeholder={translate('transaction_form_bill_label')}
-            value={formData.billName}
-            onChangeText={(value: string) => setTransaction({
-              ...formData,
-              billName: value,
-              billId: '',
-            })}
-            onSelectAutocomplete={(autocomplete) => setTransaction({
-              ...formData,
-              billId: autocomplete.id,
-              billName: autocomplete.name,
-            })}
-            InputRightElement={deleteBtn(['billId', 'billName'])}
-            routeApi="bills"
-          />
+      <AutocompleteField
+        compact
+        multiple
+        label={translate('transaction_form_tags_label')}
+        placeholder={translate('transaction_form_tags_label')}
+        value={formData.tags}
+        onChangeText={() => {}}
+        onDeleteMultiple={resetTagTransaction}
+        onSelectAutocomplete={(autocomplete) => setTransaction({
+          ...formData,
+          tags: Array.from(new Set([...formData.tags, autocomplete.name])),
+        })}
+        routeApi="tags"
+      />
 
-          <AutocompleteField
-            multiple
-            label={translate('transaction_form_tags_label')}
-            placeholder={translate('transaction_form_tags_label')}
-            value={formData.tags}
-            onChangeText={() => {}}
-            onDeleteMultiple={resetTagTransaction}
-            onSelectAutocomplete={(autocomplete) => setTransaction({
-              ...formData,
-              tags: Array.from(new Set([...formData.tags, autocomplete.name])),
-            })}
-            routeApi="tags"
-          />
-
-          <AFormView>
-            <ALabel>
-              {translate('transaction_form_notes_label')}
-            </ALabel>
-            <AInput
-              height={60}
-              numberOfLines={3}
-              value={formData.notes}
-              onChangeText={(value) => setTransaction({
-                ...formData,
-                notes: value,
-              })}
-              placeholder={translate('transaction_form_notes_label')}
-              InputRightElement={deleteBtn(['notes'])}
-            />
-          </AFormView>
-        </>
-      )}
+      <AFormView>
+        <ALabel>
+          {translate('transaction_form_notes_label')}
+        </ALabel>
+        <AInput
+          height={40}
+          numberOfLines={2}
+          value={formData.notes}
+          onChangeText={(value) => setTransaction({
+            ...formData,
+            notes: value,
+          })}
+          placeholder={translate('transaction_form_notes_label')}
+          InputRightElement={deleteBtn(['notes'])}
+        />
+      </AFormView>
 
       <AButton
         style={{
-          height: 40,
-          marginTop: 15,
+          height: 32,
+          marginTop: 4,
           marginHorizontal: 10,
           borderWidth: 0.5,
           borderColor: colors.listBorderColor,
@@ -496,7 +448,7 @@ export default function TransactionSplitForm({
       >
         <AStackFlex row>
           <AntDesign name="close-circle" size={18} color={colors.greyLight} style={{ margin: 5 }} />
-          <AText fontSize={15} color={colors.greyLight}>{translate('transaction_form_reset_button')}</AText>
+          <AText fontSize={14} color={colors.greyLight}>{translate('transaction_form_reset_button')}</AText>
         </AStackFlex>
       </AButton>
     </AStack>
