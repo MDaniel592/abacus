@@ -98,10 +98,10 @@ function AssetsAccounts() {
         <DisplayAllAccountsSwitch />
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-        <TouchableOpacity accessibilityLabel={translate('home_sort_name')} onPress={() => handleSortPress('left')}>
+        <TouchableOpacity accessibilityLabel={translate('home_sort_name')} hitSlop={12} style={{ padding: 4 }} onPress={() => handleSortPress('left')}>
           <MaterialCommunityIcons name="sort-alphabetical-ascending" size={22} color={lastPressed === 'left' ? selectedBrandStyle : colors.greyLight} />
         </TouchableOpacity>
-        <TouchableOpacity accessibilityLabel={translate('home_sort_balance')} onPress={() => handleSortPress('right')}>
+        <TouchableOpacity accessibilityLabel={translate('home_sort_balance')} hitSlop={12} style={{ padding: 4 }} onPress={() => handleSortPress('right')}>
           <MaterialCommunityIcons name="sort-numeric-descending" size={22} color={lastPressed === 'right' ? selectedBrandStyle : colors.greyLight} />
         </TouchableOpacity>
       </View>
@@ -598,7 +598,7 @@ export default function HomeScreen() {
                 accessibilityState={{ selected: selectedPage === index }}
                 onPress={() => { setSelectedPage(index); viewPagerRef.current?.setPage(index); }}
                 style={{
-                  backgroundColor: selectedPage === index ? brandStyle : colors.tileBackgroundColor, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 7,
+                  backgroundColor: selectedPage === index ? brandStyle : colors.tileBackgroundColor, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 9,
                 }}
               >
                 <AText fontSize={11} color={selectedPage === index ? brandStyleContrast : colors.greyLight} bold>{translate(label)}</AText>

@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import moment from 'moment';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -34,7 +36,7 @@ import translate from '../../i18n/locale';
 import { D_WIDTH, useThemeColors } from '../../lib/common';
 import { ScreenType } from '../../types/screen';
 import {
-  APressable, AScrollView, AStackFlex, AText, AView,
+  APressable, AStackFlex, AText, AView,
 } from '../UI/ALibrary';
 import AFilterButton from '../UI/ALibrary/AFilterButton';
 import AButton from '../UI/ALibrary/AButton';
@@ -495,29 +497,49 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
       )}
       ListHeaderComponent={(
         <AView>
-          <AStackFlex row backgroundColor={colors.tileBackgroundColor} py={8}>
-            {(type !== '' || currentCode !== '' || account !== '' || category !== '' || tag !== '' || search !== '') && (
-            <AView
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: 30,
-                height: 30,
-                marginHorizontal: 5,
-              }}
+          <AView
+            style={{
+              backgroundColor: colors.backgroundColor,
+              paddingTop: 12,
+              paddingBottom: 12,
+              borderBottomWidth: 0.5,
+              borderColor: colors.listBorderColor,
+            }}
+          >
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingHorizontal: 12, alignItems: 'center' }}
             >
-              <Ionicons onPress={resetFilters} name="close-circle" size={19} color={colors.text} />
-            </AView>
-            )}
-            <AScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {(type !== '' || currentCode !== '' || account !== '' || category !== '' || tag !== '' || search !== '') && (
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={translate('transaction_form_reset_button')}
+                hitSlop={{ top: 6, bottom: 6 }}
+                onPress={resetFilters}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  height: 36,
+                  paddingHorizontal: 12,
+                  marginRight: 8,
+                  borderRadius: 18,
+                  backgroundColor: colors.brandDangerLight,
+                }}
+              >
+                <Ionicons name="close" size={16} color={colors.brandDanger} style={{ marginRight: 4 }} />
+                <AText fontSize={13} color={colors.brandDanger} bold>{translate('transaction_form_reset_button')}</AText>
+              </TouchableOpacity>
+              )}
               <ADateFilterButton currentDate={start} selectDate={(date: Date) => { setStartDate(date); setEndDate(moment(date).endOf('month').toDate()); }} />
               <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
               <AFilterButton filterKind="category" filterType={translate('transaction_form_category_label')} selected={category} selectFilter={setCategory} navigation={navigation} />
               <AFilterButton filterKind="tag" filterType={translate('transaction_form_tags_label')} selected={tag} selectFilter={setTag} navigation={navigation} />
               <AFilterButton filterType={translate('currency')} selected={currentCode} selectFilter={(selected) => setCurrentCode(selected)} navigation={navigation} />
               <AFilterButton filterType={translate('home_accounts')} selected={account} selectFilter={(selected) => setAccount(selected)} navigation={navigation} />
-            </AScrollView>
-          </AStackFlex>
+            </ScrollView>
+          </AView>
           {loadError && (
           <AView style={{ padding: 16 }}>
             <AText fontSize={13}>{translate('transaction_filter_load_error')}</AText>

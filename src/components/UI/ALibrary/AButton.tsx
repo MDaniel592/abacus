@@ -40,8 +40,9 @@ export default function AButton({
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => ({
-        opacity: disabled && disabledTint ? 0.3 : 1,
-        backgroundColor: pressed ? colors.filterBorderColor : backgroundColor,
+        // Dim on press instead of swapping to a grey fill, so the label keeps its contrast.
+        opacity: (disabled && disabledTint ? 0.3 : 1) * (pressed ? 0.7 : 1),
+        backgroundColor,
         borderRadius: 10,
         marginBottom: 10,
         flexDirection: 'row',

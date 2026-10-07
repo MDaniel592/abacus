@@ -120,7 +120,7 @@ export default function NavigationHeader({ navigation }) {
       >
         <AText fontSize={20} bold color={brandStyleText}>abacus.</AText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel={translate('home_previous_period')} onPress={() => changePeriod(-1)} style={{ padding: 8 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={translate('home_previous_period')} onPress={() => changePeriod(-1)} hitSlop={6} style={{ padding: 11 }}>
             <Ionicons name="chevron-back" size={18} color={colors.greyLight} />
           </Pressable>
           <Pressable
@@ -136,7 +136,7 @@ export default function NavigationHeader({ navigation }) {
             <AText fontSize={10} color={colors.greyLight}>{currentCode}</AText>
             <Ionicons name="chevron-down" size={12} color={colors.greyLight} />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={translate('home_next_period')} onPress={() => changePeriod(1)} style={{ padding: 8 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={translate('home_next_period')} onPress={() => changePeriod(1)} hitSlop={6} style={{ padding: 11 }}>
             <Ionicons name="chevron-forward" size={18} color={colors.greyLight} />
           </Pressable>
         </View>

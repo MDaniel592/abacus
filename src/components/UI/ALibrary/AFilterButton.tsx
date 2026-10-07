@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { AText, AView } from './index';
 import { NavigationType } from '../../../types/screen';
-import { useThemeColors } from '../../../lib/common';
+import { useBrandStyle, useThemeColors } from '../../../lib/common';
 import translate from '../../../i18n/locale';
 import { NO_CATEGORY } from '../../../lib/transaction-search';
 
@@ -26,9 +26,13 @@ export default function AFilterButton({
   filterKind,
 }: AFilterButtonType) {
   const { colors } = useThemeColors();
+  const { brandStyle, brandStyleContrast } = useBrandStyle();
+  const textColor = selected ? brandStyleContrast : colors.text;
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
+      hitSlop={{ top: 6, bottom: 6 }}
       onPress={() => navigation.navigate('FilterScreen', {
         filterType,
         selectFilter,
@@ -41,17 +45,20 @@ export default function AFilterButton({
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: selected ? colors.filterBorderColor : colors.listBorderColor,
-          borderRadius: 8,
-          paddingHorizontal: 7,
-          marginHorizontal: 2,
-          height: 35,
+          backgroundColor: selected ? brandStyle : colors.tileBackgroundColor,
+          borderWidth: 1,
+          borderColor: selected ? brandStyle : colors.listBorderColor,
+          borderRadius: 18,
+          paddingLeft: 14,
+          paddingRight: 10,
+          marginRight: 8,
+          height: 36,
         }}
       >
-        <AText fontSize={15} bold capitalize={capitalize}>
+        <AText fontSize={13} color={textColor} bold={Boolean(selected)} capitalize={capitalize} numberOfLines={1} maxWidth={160}>
           {selected === NO_CATEGORY ? translate('no_category') : filterType === translate('transaction_type_label') && selected !== '' ? translate(`transaction_form_type_${selected}`) : selected || filterType}
         </AText>
-        <Ionicons name="chevron-down-outline" size={15} color={colors.text} />
+        <Ionicons name="chevron-down-outline" size={14} color={textColor} style={{ marginLeft: 4 }} />
       </AView>
     </TouchableOpacity>
   );

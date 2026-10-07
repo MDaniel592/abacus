@@ -195,10 +195,10 @@ export default function TransactionSplitForm({
 
       <AFormView>
         <AStack row justifyContent="center" style={{ width: '100%', height: 40 }}>
-          <AButton px={6} onPress={() => setShowDatePicker(true)} style={{ height: 38, borderWidth: 0 }}>
+          <AButton px={12} mx={4} onPress={() => setShowDatePicker(true)} style={{ height: 38, borderWidth: 0, marginBottom: 0 }}>
             <AText fontSize={16}>{moment(formData.date).locale('es').format('D MMM YYYY').replace('.', '')}</AText>
           </AButton>
-          <AButton px={6} onPress={() => setShowTimePicker(true)} style={{ height: 38, borderWidth: 0 }}>
+          <AButton px={12} mx={4} onPress={() => setShowTimePicker(true)} style={{ height: 38, borderWidth: 0, marginBottom: 0 }}>
             <AText fontSize={15}>{hasCustomTime ? moment(formData.date).format('HH:mm') : translate('transaction_form_add_time')}</AText>
           </AButton>
           {(showDatePicker || showTimePicker) && (

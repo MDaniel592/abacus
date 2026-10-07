@@ -22,7 +22,7 @@ export default function ADateFilterButton({
   const [showDatePicker, setShowDatePicker] = useState(Platform.OS === 'ios');
 
   return (
-    <AView style={{ marginHorizontal: 2 }}>
+    <AView style={{ marginRight: 8 }}>
       {showDatePicker && (
         <DateTimePicker
           accentColor={colors.brandDark}
@@ -38,6 +38,8 @@ export default function ADateFilterButton({
       )}
       {Platform.OS === 'android' && (
         <TouchableOpacity
+          accessibilityRole="button"
+          hitSlop={{ top: 6, bottom: 6 }}
           onPress={() => setShowDatePicker(true)}
         >
           <AView
@@ -45,15 +47,18 @@ export default function ADateFilterButton({
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: colors.listBorderColor,
-              borderRadius: 8,
-              paddingHorizontal: 7,
-              marginHorizontal: 2,
-              height: 35,
+              backgroundColor: colors.tileBackgroundColor,
+              borderWidth: 1,
+              borderColor: colors.listBorderColor,
+              borderRadius: 18,
+              paddingLeft: 12,
+              paddingRight: 10,
+              height: 36,
             }}
           >
-            <AText fontSize={14} bold>{moment(currentDate).format('ll')}</AText>
-            <Ionicons name="chevron-down-outline" size={15} color={colors.text} />
+            <Ionicons name="calendar-outline" size={15} color={colors.text} style={{ marginRight: 6 }} />
+            <AText fontSize={13}>{moment(currentDate).format('ll')}</AText>
+            <Ionicons name="chevron-down-outline" size={14} color={colors.text} style={{ marginLeft: 4 }} />
           </AView>
         </TouchableOpacity>
       )}
