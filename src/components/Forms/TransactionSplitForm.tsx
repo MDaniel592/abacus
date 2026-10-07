@@ -265,6 +265,7 @@ export default function TransactionSplitForm({
         routeApi="transactions"
       />
 
+      {formData.type !== 'deposit' && (
       <AutocompleteField
         compact
         key={`source-${formData.type}`}
@@ -294,6 +295,9 @@ export default function TransactionSplitForm({
         routeApi="accounts"
       />
 
+      )}
+
+      {formData.type !== 'withdrawal' && (
       <AutocompleteField
         compact
         key={`destination-${formData.type}`}
@@ -323,6 +327,8 @@ export default function TransactionSplitForm({
           : ['destinationName', 'destinationId'])}
         routeApi="accounts"
       />
+
+      )}
 
       <AutocompleteField
         compact

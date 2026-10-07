@@ -19,6 +19,8 @@ export default function NavigationHeader({ navigation }) {
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
   const title = useSelector((state: RootState) => state.firefly.rangeDetails.title);
   const start = useSelector((state: RootState) => state.firefly.rangeDetails.start);
+  const range = useSelector((state: RootState) => state.firefly.rangeDetails.range);
+  const [pickerRange, setPickerRange] = useState(range);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(moment(start).format('YYYY'));
   const dispatch = useDispatch<RootDispatch>();
@@ -71,19 +73,32 @@ export default function NavigationHeader({ navigation }) {
                 <Ionicons name="chevron-forward" size={18} color={colors.text} />
               </Pressable>
             </View>
+            <View style={{ flexDirection: 'row', gap: 4, marginBottom: 10 }}>
+              {[{ size: 1, label: 'period_month' }, { size: 3, label: 'period_quarter' }, { size: 6, label: 'period_half_year' }, { size: 12, label: 'period_year' }].map((choice) => (
+                <Pressable
+                  key={choice.size}
+                  onPress={() => setPickerRange(choice.size)}
+                  style={{
+                    flex: 1, paddingVertical: 9, borderRadius: 7, backgroundColor: pickerRange === choice.size ? colors.brandStyle : colors.backgroundColor,
+                  }}
+                >
+                  <AText fontSize={10} textAlign="center" color={pickerRange === choice.size ? 'white' : colors.text}>{translate(choice.label)}</AText>
+                </Pressable>
+              ))}
+            </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {Array.from({ length: 12 }, (_, month) => (
+              {Array.from({ length: 12 / pickerRange }, (_, slot) => slot * pickerRange).map((month) => (
                 <Pressable
                   key={month}
                   onPress={() => {
                     if (!/^\d{4}$/.test(pickerYear) || Number(pickerYear) < 1) return;
-                    dispatch.firefly.setRange({ range: 1, monthStart: `${pickerYear}-${String(month + 1).padStart(2, '0')}-01` });
+                    dispatch.firefly.setRange({ range: pickerRange, monthStart: `${pickerYear}-${String(month + 1).padStart(2, '0')}-01` });
                     setPickerOpen(false);
                   }}
-                  style={{ width: '33.333%', paddingVertical: 14 }}
+                  style={{ width: pickerRange === 1 ? '33.333%' : pickerRange === 12 ? '100%' : '50%', paddingVertical: 14 }}
                 >
                   <AText textAlign="center" fontSize={14} color={moment(start).month() === month && moment(start).format('YYYY') === pickerYear ? colors.brandStyle : colors.text}>
-                    {moment().month(month).locale('es').format('MMM')
+                    {pickerRange === 12 ? pickerYear : pickerRange === 3 ? `T${month / 3 + 1}` : pickerRange === 6 ? `S${month / 6 + 1}` : moment().month(month).locale('es').format('MMM')
                       .replace('.', '')}
                   </AText>
                 </Pressable>
@@ -105,7 +120,7 @@ export default function NavigationHeader({ navigation }) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={translate('filters_screen_title')}
-            onPress={() => { setPickerYear(moment(start).format('YYYY')); setPickerOpen(true); }}
+            onPress={() => { setPickerYear(moment(start).format('YYYY')); setPickerRange(range); setPickerOpen(true); }}
             onLongPress={() => navigation.dispatch(CommonActions.navigate({ name: 'FiltersScreen' }))}
             style={{
               flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 10,

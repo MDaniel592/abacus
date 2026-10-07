@@ -2,7 +2,7 @@
 
 Esta copia utiliza el proyecto Expo `ef46b4e9-771d-4e19-ada2-5946ddfb078f`, de la cuenta `mmdaniel`, y el identificador Android `io.github.mdaniel592.abacus`.
 
-## Primera compilación
+## Compilación con Expo
 
 Desde la copia de este repositorio, con Node instalado:
 
@@ -13,7 +13,9 @@ npx eas-cli@latest project:info
 npx eas-cli@latest build --platform android --profile preview
 ```
 
-Inicia sesión con `mmdaniel`. En la primera compilación, si EAS pregunta por la firma Android, elige generar un nuevo keystore. Conserva la firma en Expo para que los futuros APK actualicen esta misma instalación.
+Inicia sesión con `mmdaniel`. La primera compilación local utiliza una firma propia: antes de compilar actualizaciones con EAS, importa ese mismo keystore en las credenciales Android del proyecto (`npx eas-cli@latest credentials --platform android`). No generes otro keystore para actualizar una instalación firmada localmente.
+
+La firma local se conserva fuera del repositorio en `/root/.local/share/abacus-signing/abacus-personal.keystore`. Su alias y contraseñas están en `signing.env` dentro de esa misma carpeta privada. No se publican en GitHub ni en el servidor de descargas. Las actualizaciones deben mantener paquete y firma, y aumentar el `versionCode` por encima del instalado.
 
 El proyecto ya está vinculado mediante `extra.eas.projectId` en `app.config.js`: no hace falta ejecutar `create-expo-app` ni crear otro repositorio.
 

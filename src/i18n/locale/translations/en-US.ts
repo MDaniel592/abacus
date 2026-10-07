@@ -1,5 +1,9 @@
 export default {
   transaction_form_add_time: 'Add time',
+  period_month: 'Month',
+  period_quarter: 'Quarter',
+  period_half_year: 'Half year',
+  period_year: 'Year',
   home_expenses_only: 'Expenses only',
   transaction_filter_total: 'Total',
   transaction_filter_daily_average: 'Daily average',

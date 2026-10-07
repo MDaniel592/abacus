@@ -4,6 +4,9 @@ const demoState = {
   screen: 'home',
   previous: 'home',
   month: 9,
+  range: 1,
+  editingPeriod: null,
+  editingOriginalId: null,
   year: 2026,
   editingId: null,
   overrides: new Map(),
@@ -17,7 +20,7 @@ const demoState = {
   privateMode: false,
   categoryView: 'all',
   form: {
-    type: 'withdrawal', amount: '', asset: 'Cuenta principal', counterpart: '', description: '', date: '2026-10-07', time: '', showTime: false, category: '', tag: '', notes: '', details: true,
+    type: 'withdrawal', amount: '', asset: 'Cuenta principal', counterpart: '', description: '', date: '2026-10-07', time: '', showTime: false, category: '', tag: '', budget: '', bill: '', notes: '', details: true,
   },
 };
 const money = (value) => (demoState.privateMode ? '••••' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value));
@@ -78,28 +81,39 @@ function icon(name, size = 20) {
 }
 function periodKey() { return `${demoState.year}-${demoState.month}`; }
 function monthTransactions() {
-  const factor = Math.max(0.3, 1 + (demoState.month - 9) * 0.08 + (demoState.year - 2026) * 0.03);
-  const examples = transactions.map((transaction) => ({ ...transaction, amount: Math.round(transaction.amount * factor * 100) / 100, ...demoState.overrides.get(`${periodKey()}:${transaction.id}`) })).filter((entry) => !entry.deleted);
-  return [...examples, ...(demoState.extraEntries.get(periodKey()) || [])];
+  return [...Array(demoState.range).keys()].map((offset) => {
+    const month = demoState.month + offset;
+    const key = `${demoState.year}-${month}`;
+    const factor = Math.max(0.3, 1 + (month - 9) * 0.08 + (demoState.year - 2026) * 0.03);
+    const examples = transactions.map((transaction) => ({ ...transaction, amount: Math.round(transaction.amount * factor * 100) / 100, ...demoState.overrides.get(`${key}:${transaction.id}`) })).filter((entry) => !entry.deleted);
+    return [...examples, ...(demoState.extraEntries.get(key) || [])].map((entry) => ({
+      ...entry, originalId: entry.id, originalPeriod: key, month, year: demoState.year, id: demoState.range === 1 ? entry.id : `${key}/${entry.id}`,
+    }));
+  }).flat().sort((left, right) => right.month - left.month || right.day - left.day);
 }
 function monthAccounts() {
-  const difference = (demoState.month - 9 + (demoState.year - 2026) * 12) * 175;
+  const difference = (demoState.month + demoState.range - 1 - 9 + (demoState.year - 2026) * 12) * 175;
   return [
     {
-      name: 'Cuenta principal', balance: 2948.7 + difference, change: 1207.7 + difference / 5, icon: 'bank',
+      name: 'Cuenta principal', balance: 2948.7 + difference, change: demoState.range * (1207.7 + difference / 5), icon: 'bank',
     },
     {
-      name: 'Ahorro', balance: 2400 + difference, change: 150, icon: 'saving',
+      name: 'Ahorro', balance: 2400 + difference, change: 150 * demoState.range, icon: 'saving',
     },
     {
-      name: 'Efectivo', balance: 300, change: -28.8, icon: 'wallet',
+      name: 'Efectivo', balance: 300, change: -28.8 * demoState.range, icon: 'wallet',
     },
   ];
 }
-function monthLabel() { return new Date(demoState.year, demoState.month, 1).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }).replace('.', ''); }
+function monthLabel() {
+  if (demoState.range === 12) return String(demoState.year);
+  if (demoState.range === 3) return `T${demoState.month / 3 + 1} ${demoState.year}`;
+  if (demoState.range === 6) return `S${demoState.month / 6 + 1} ${demoState.year}`;
+  return new Date(demoState.year, demoState.month, 1).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }).replace('.', '');
+}
 function header() {
   if (demoState.screen === 'form') return `<header class="app-header"><div class="compact-back"><button class="icon-button" data-action="back" aria-label="Volver">${icon('left', 20)}</button><div class="app-brand">${demoState.editingId ? 'Editar movimiento' : 'Nuevo movimiento'}</div></div>${demoState.editingId ? `<button class="icon-button" data-action="entry-actions" aria-label="Más acciones del movimiento">${icon('more', 19)}</button>` : ''}</header>`;
-  return `<header class="app-header"><div class="app-brand">abacus<span style="color:var(--accent)">.</span></div><div class="month-picker"><button data-action="previous-month" aria-label="Mes anterior">${icon('left', 15)}</button><button data-action="pick-month" aria-label="Elegir mes y año">${monthLabel()}</button><button data-action="next-month" aria-label="Mes siguiente">${icon('right', 15)}</button></div></header>`;
+  return `<header class="app-header"><div class="app-brand">abacus<span style="color:var(--accent)">.</span></div><div class="month-picker"><button data-action="previous-month" aria-label="Periodo anterior">${icon('left', 15)}</button><button data-action="pick-month" aria-label="Elegir mes y año">${monthLabel()}</button><button data-action="next-month" aria-label="Periodo siguiente">${icon('right', 15)}</button></div></header>`;
 }
 function navigation() {
   return `<nav class="bottom-nav" aria-label="Navegación principal">${[
@@ -113,7 +127,7 @@ function home() {
   const accounts = monthAccounts();
   const earned = entries.filter((entry) => entry.type === 'deposit').reduce((total, entry) => total + entry.amount, 0);
   const spent = entries.filter((entry) => entry.type === 'withdrawal').reduce((total, entry) => total - entry.amount, 0);
-  return `<div class="screen"><div class="balance"><div class="muted">Saldo neto de tus cuentas</div><div class="balance-value">${money(accounts.reduce((total, account) => total + account.balance, 0))}</div><div class="balance-sub">Al cierre del periodo seleccionado</div></div><div class="two"><div class="metric"><div class="metric-label"><span class="dot"></span>Ingresos</div><div class="metric-value">${money(earned)}</div></div><div class="metric"><div class="metric-label"><span class="dot expense"></span>Gastos</div><div class="metric-value">${money(spent)}</div></div></div><div class="section-title"><h4>Tus cuentas</h4><span class="muted">${monthLabel()}</span></div><div class="account-list">${accounts.map((account) => `<button class="account" data-account="${escapeHtml(account.name)}"><div class="row"><div class="account-logo">${icon(account.icon, 20)}</div><div><div class="account-title">${account.name}</div><div class="tx-meta">EUR</div></div></div><div class="account-right"><div class="account-amount">${money(account.balance)}</div><div class="account-change">${account.change > 0 ? '+' : ''}${money(account.change)} en el mes</div></div></button>`).join('')}</div><div class="section-title"><h4>Gastos por categoría</h4><button class="text-button" data-screen="categories">Ver todas ↗</button></div>${categoryList(true)}</div>`;
+  return `<div class="screen"><div class="balance"><div class="muted">Saldo neto de tus cuentas</div><div class="balance-value">${money(accounts.reduce((total, account) => total + account.balance, 0))}</div><div class="balance-sub">Al cierre del periodo seleccionado</div></div><div class="two"><div class="metric"><div class="metric-label"><span class="dot"></span>Ingresos</div><div class="metric-value">${money(earned)}</div></div><div class="metric"><div class="metric-label"><span class="dot expense"></span>Gastos</div><div class="metric-value">${money(spent)}</div></div></div><div class="section-title"><h4>Tus cuentas</h4><span class="muted">${monthLabel()}</span></div><div class="account-list">${accounts.map((account) => `<button class="account" data-account="${escapeHtml(account.name)}"><div class="row"><div class="account-logo">${icon(account.icon, 20)}</div><div><div class="account-title">${account.name}</div><div class="tx-meta">EUR</div></div></div><div class="account-right"><div class="account-amount">${money(account.balance)}</div><div class="account-change">${account.change > 0 ? '+' : ''}${money(account.change)} en el periodo</div></div></button>`).join('')}</div><div class="section-title"><h4>Gastos por categoría</h4><button class="text-button" data-screen="categories">Ver todas ↗</button></div>${categoryList(true)}</div>`;
 }
 function groupedCategories() {
   const groups = new Map();
@@ -162,7 +176,7 @@ function movementList() {
     && (!demoState.account || entry.account === demoState.account)
     && (!demoState.type || entry.type === demoState.type)
     && entry.name.toLocaleLowerCase().includes(demoState.search.toLocaleLowerCase()));
-  return { items, html: items.length ? `<div class="list">${items.map((entry) => `<button class="transaction transaction-button" data-entry="${escapeHtml(entry.id)}" aria-label="Editar ${escapeHtml(entry.name)}"><div class="row"><div class="tx-icon">${icon(entry.type === 'transfer' ? 'movements' : entry.amount > 0 ? 'income' : 'expense', 19)}</div><div><div class="tx-title">${entry.name}</div><div class="tx-meta">${entry.day} ${monthLabel().split(' ')[0]} · ${entry.category || 'Sin categoría'} · ${entry.account}</div>${entry.tags.length ? `<span class="tx-tags">${entry.tags.map((tag) => `#${tag}`).join(' · ')}</span>` : ''}</div></div><span class="tx-value" data-movement-type="${entry.type}">${entry.type === 'transfer' ? '' : entry.amount > 0 ? '+' : '−'}${money(Math.abs(entry.amount))}</span></button>`).join('')}</div>` : '<div class="empty-state">No hay movimientos con estos filtros.<br>Prueba a quitar una categoría o etiqueta.</div>' };
+  return { items, html: items.length ? `<div class="list">${items.map((entry) => `<button class="transaction transaction-button" data-entry="${escapeHtml(entry.id)}" aria-label="Editar ${escapeHtml(entry.name)}"><div class="row"><div class="tx-icon">${icon(entry.type === 'transfer' ? 'movements' : entry.amount > 0 ? 'income' : 'expense', 19)}</div><div><div class="tx-title">${entry.name}</div><div class="tx-meta">${entry.day} ${new Date(entry.year, entry.month, 1).toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')} · ${entry.category || 'Sin categoría'} · ${entry.account}</div>${entry.tags.length ? `<span class="tx-tags">${entry.tags.map((tag) => `#${tag}`).join(' · ')}</span>` : ''}</div></div><span class="tx-value" data-movement-type="${entry.type}">${entry.type === 'transfer' ? '' : entry.amount > 0 ? '+' : '−'}${money(Math.abs(entry.amount))}</span></button>`).join('')}</div>` : '<div class="empty-state">No hay movimientos con estos filtros.<br>Prueba a quitar una categoría o etiqueta.</div>' };
 }
 function movements() {
   const all = monthTransactions();
@@ -176,6 +190,8 @@ function formField(label, key, value, type = 'text', placeholder = '') {
     asset: monthAccounts().map((account) => account.name),
     counterpart: [...monthAccounts().map((account) => account.name), ...entries.map((entry) => entry.counterpart || entry.name)],
     category: entries.map((entry) => entry.category).filter(Boolean),
+    budget: ['Casa', 'Personal', 'Transporte'],
+    bill: ['Alquiler', 'Electricidad', 'Internet', 'Suscripción'],
     tag: entries.flatMap((entry) => entry.tags),
   };
   const suggestions = values[key];
@@ -186,10 +202,10 @@ function form() {
   const income = data.type === 'deposit';
   const transfer = data.type === 'transfer';
   const label = income ? 'ingreso' : transfer ? 'traspaso' : 'gasto';
-  return `<div class="screen"><div class="type-switch">${[['withdrawal', 'Gasto'], ['deposit', 'Ingreso'], ['transfer', 'Traspaso']].map(([type, name]) => `<button data-form-type="${type}" ${demoState.editingId && type !== data.type ? 'disabled' : ''} class="${data.type === type ? 'selected' : ''}" aria-pressed="${data.type === type}">${name}</button>`).join('')}</div><div class="amount-block"><div class="amount-label">Importe del ${label}</div><div class="amount-input" data-amount-type="${data.type}"><input data-form="amount" inputmode="decimal" value="${escapeHtml(data.amount)}" placeholder="0,00" aria-label="Importe"><span>€</span></div><small>EUR · Euro</small></div><div class="entry-date-row"><button data-action="pick-date" aria-label="Fecha del movimiento">${escapeHtml(readableDate(data.date))}</button><input class="picker-input" data-form="date" type="date" tabindex="-1" value="${escapeHtml(data.date)}">${data.showTime ? `<button data-action="pick-time" aria-label="Hora del movimiento">${escapeHtml(data.time || '12:00')}</button>` : '<button data-action="add-time" aria-label="Añadir hora">Hora</button>'}<input class="picker-input" data-form="time" type="time" tabindex="-1" value="${escapeHtml(data.time || '12:00')}"></div><div class="form-group">${formField('Descripción', 'description', data.description, 'text', '¿Qué movimiento es?')}${formField(income ? 'Ingreso en' : transfer ? 'Desde' : 'Pagar desde', 'asset', data.asset)}${formField(income ? '¿Quién te paga?' : transfer ? 'Cuenta de destino' : '¿A quién pagas?', 'counterpart', data.counterpart, 'text', income ? 'Empresa o cliente' : transfer ? 'Otra cuenta' : 'Comercio o persona')}<div class="details">${formField('Categoría', 'category', data.category, 'text', 'Sin categoría')}${formField('Etiqueta', 'tag', data.tag, 'text', 'Ej. Casa')}${formField('Notas', 'notes', data.notes)}</div></div></div><div class="form-footer"><button class="primary" data-action="save">${demoState.editingId ? 'Guardar cambios' : `Guardar ${label}`} ${icon('upRight', 17)}</button></div>`;
+  return `<div class="screen"><div class="type-switch">${[['withdrawal', 'Gasto'], ['deposit', 'Ingreso'], ['transfer', 'Traspaso']].map(([type, name]) => `<button data-form-type="${type}" ${demoState.editingId && type !== data.type ? 'disabled' : ''} class="${data.type === type ? 'selected' : ''}" aria-pressed="${data.type === type}">${name}</button>`).join('')}</div><div class="amount-block"><div class="amount-label">Importe del ${label}</div><div class="amount-input" data-amount-type="${data.type}"><input data-form="amount" inputmode="decimal" value="${escapeHtml(data.amount)}" placeholder="0,00" aria-label="Importe"><span>€</span></div><small>EUR · Euro</small></div><div class="entry-date-row"><button data-action="pick-date" aria-label="Fecha del movimiento">${escapeHtml(readableDate(data.date))}</button><input class="picker-input" data-form="date" type="date" tabindex="-1" value="${escapeHtml(data.date)}">${data.showTime ? `<button data-action="pick-time" aria-label="Hora del movimiento">${escapeHtml(data.time || '12:00')}</button>` : '<button data-action="add-time" aria-label="Añadir hora">Hora</button>'}<input class="picker-input" data-form="time" type="time" tabindex="-1" value="${escapeHtml(data.time || '12:00')}"></div><div class="form-group">${formField('Descripción', 'description', data.description, 'text', '¿Qué movimiento es?')}${formField(income ? 'Ingreso en' : transfer ? 'Desde' : 'Pagar desde', 'asset', data.asset)}${transfer ? formField('Cuenta de destino', 'counterpart', data.counterpart, 'text', 'Otra cuenta') : ''}<div class="details">${formField('Categoría', 'category', data.category, 'text', 'Sin categoría')}<div class="field-pair">${formField('Presupuesto', 'budget', data.budget || '', 'text', 'Sin presupuesto')}${formField('Factura', 'bill', data.bill || '', 'text', 'Sin factura')}</div>${formField('Etiqueta', 'tag', data.tag, 'text', 'Ej. Casa')}${formField('Notas', 'notes', data.notes)}</div></div></div><div class="form-footer"><button class="primary" data-action="save">${demoState.editingId ? 'Guardar cambios' : `Guardar ${label}`} ${icon('upRight', 17)}</button></div>`;
 }
 function settings() {
-  return `<div class="screen"><h3 class="view-title">A tu gusto</h3><div class="view-subtitle">Perspectiva, sin gráficos y con tus cuentas siempre a mano.</div><div class="demo-settings"><div class="settings-row"><span>Apariencia</span><button data-action="theme">${demoState.theme === 'day' ? 'Cambiar a oscuro' : 'Cambiar a claro'}</button></div><div class="settings-row"><span>Modo privado</span><button data-action="privacy" aria-pressed="${demoState.privateMode}">${demoState.privateMode ? 'Activado' : 'Desactivado'}</button></div><div class="settings-row"><span>Ver las cuatro propuestas</span><a href="ux-alternatives.html">Abrir ↗</a></div><div class="settings-row"><span>Datos de ejemplo</span><button data-action="reset-demo">Restablecer</button></div></div><p class="categories-note">Esta web sirve para probar el diseño. Los saldos, categorías, etiquetas y movimientos son ficticios y no se guardan al cerrar la página.</p></div>`;
+  return `<div class="screen"><h3 class="view-title">A tu gusto</h3><div class="view-subtitle">Perspectiva, sin gráficos y con tus cuentas siempre a mano.</div><div class="demo-settings"><div class="settings-row"><span>Apariencia</span><button data-action="theme">${demoState.theme === 'day' ? 'Cambiar a oscuro' : 'Cambiar a claro'}</button></div><div class="settings-row"><span>Modo privado</span><button data-action="privacy" aria-pressed="${demoState.privateMode}">${demoState.privateMode ? 'Activado' : 'Desactivado'}</button></div></div></div>`;
 }
 function render() {
   document.body.classList.toggle('theme-night', demoState.theme === 'night');
@@ -213,16 +229,22 @@ function openEntry(id) {
   if (!entry) return;
   demoState.previous = 'transactions';
   demoState.editingId = id;
+  demoState.editingPeriod = entry.originalPeriod;
+  demoState.editingOriginalId = entry.originalId;
   demoState.form = {
     type: entry.type,
     amount: String(Math.abs(entry.amount)).replace('.', ','),
     asset: entry.account,
+    budget: entry.budget || '',
+    bill: entry.bill || '',
     counterpart: entry.counterpart || (entry.amount < 0 ? entry.name : 'Empresa'),
     description: entry.name,
-    date: `${demoState.year}-${String(demoState.month + 1).padStart(2, '0')}-${String(entry.day).padStart(2, '0')}`,
+    date: `${entry.year}-${String(entry.month + 1).padStart(2, '0')}-${String(entry.day).padStart(2, '0')}`,
     category: entry.category,
     tag: entry.tags.join(', '),
     notes: entry.notes || '',
+    time: entry.time || '',
+    showTime: Boolean(entry.time),
     details: true,
   };
   demoState.screen = 'form';
@@ -262,10 +284,12 @@ function saveEntry() {
     showMessage('Revisa la hora', 'Introduce una hora válida (HH:mm).');
     return;
   }
-  const id = demoState.editingId || `demo-${Date.now()}`;
+  const id = (demoState.editingId ? demoState.editingOriginalId : null) || `demo-${Date.now()}`;
   const entry = {
     id,
     name: data.description.trim(),
+    budget: data.budget || '',
+    bill: data.bill || '',
     amount: data.type === 'withdrawal' ? -amount : amount,
     type: data.type,
     account: data.asset,
@@ -276,7 +300,7 @@ function saveEntry() {
     day: dateParts[2],
     time: data.showTime ? data.time || '12:00' : '',
   };
-  const originalPeriod = periodKey();
+  const originalPeriod = demoState.editingId ? demoState.editingPeriod : periodKey();
   const targetPeriod = `${dateParts[0]}-${dateParts[1] - 1}`;
   const editing = Boolean(demoState.editingId);
   if (editing) {
@@ -290,7 +314,7 @@ function saveEntry() {
   }
   if (editing) {
     demoState.screen = 'transactions';
-    demoState.month = dateParts[1] - 1;
+    demoState.month = Math.floor((dateParts[1] - 1) / demoState.range) * demoState.range;
     [demoState.year] = dateParts;
   } else {
     demoState.form.amount = '';
@@ -311,8 +335,10 @@ document.addEventListener('focusout', (event) => {
   if (event.target.dataset.suggestions && !event.relatedTarget?.hasAttribute('data-suggestion-field')) document.getElementById(`suggest-${event.target.dataset.suggestions}`).hidden = true;
 });
 let pickerYear = demoState.year;
+let pickerRange = demoState.range;
 function renderMonthPicker() {
-  document.getElementById('month-options').innerHTML = `<div class="year-picker"><button data-action="previous-year" aria-label="Año anterior">${icon('left', 18)}</button><input aria-label="Año" data-picker-year type="number" min="1" max="9999" value="${pickerYear}"><button data-action="next-year" aria-label="Año siguiente">${icon('right', 18)}</button></div><div class="month-grid">${shortMonths.map((name, month) => `<button data-select-month="${month}" class="${month === demoState.month && pickerYear === demoState.year ? 'selected' : ''}">${name}</button>`).join('')}</div><button data-action="cancel-month">Cancelar</button>`;
+  const slots = [...Array(12 / pickerRange).keys()].map((index) => index * pickerRange);
+  document.getElementById('month-options').innerHTML = `<div class="year-picker"><button data-action="previous-year" aria-label="Año anterior">${icon('left', 18)}</button><input aria-label="Año" data-picker-year type="number" min="1" max="9999" value="${pickerYear}"><button data-action="next-year" aria-label="Año siguiente">${icon('right', 18)}</button></div><div class="period-types">${[[1, 'Mes'], [3, 'Trimestre'], [6, 'Semestre'], [12, 'Año']].map(([size, name]) => `<button data-picker-range="${size}" class="${pickerRange === size ? 'selected' : ''}">${name}</button>`).join('')}</div><div class="month-grid" data-period-size="${pickerRange}">${slots.map((month) => `<button data-select-month="${month}" class="${month === demoState.month && pickerYear === demoState.year && pickerRange === demoState.range ? 'selected' : ''}">${pickerRange === 12 ? pickerYear : pickerRange === 3 ? `T${month / 3 + 1} · ${shortMonths[month]}–${shortMonths[month + 2]}` : pickerRange === 6 ? `S${month / 6 + 1} · ${shortMonths[month]}–${shortMonths[month + 5]}` : shortMonths[month]}</button>`).join('')}</div><button data-action="cancel-month">Cancelar</button>`;
 }
 document.addEventListener('click', (event) => {
   const button = event.target.closest('button');
@@ -325,21 +351,22 @@ document.addEventListener('click', (event) => {
     document.getElementById(`suggest-${field}`).hidden = true;
     return;
   }
-  if (button.hasAttribute('data-select-month')) { demoState.month = Number(button.dataset.selectMonth); demoState.year = pickerYear; document.getElementById('month-dialog').close(); render(); return; }
+  if (button.hasAttribute('data-picker-range')) { pickerRange = Number(button.dataset.pickerRange); renderMonthPicker(); return; }
+  if (button.hasAttribute('data-select-month')) { demoState.range = pickerRange; demoState.month = Number(button.dataset.selectMonth); demoState.year = pickerYear; document.getElementById('month-dialog').close(); render(); return; }
   if (button.dataset.entry) { openEntry(button.dataset.entry); return; }
   if (button.dataset.screen) { goTo(button.dataset.screen); return; }
   if (button.dataset.categoryView) { demoState.categoryView = button.dataset.categoryView; render(); return; }
   if (button.dataset.category) { demoState.category = button.dataset.category; demoState.type = button.dataset.categoryScope === 'all' ? '' : 'withdrawal'; demoState.tag = ''; demoState.account = ''; demoState.search = ''; goTo('transactions'); return; }
   if (button.dataset.account) { demoState.account = button.dataset.account; demoState.category = ''; demoState.tag = ''; demoState.type = ''; demoState.search = ''; goTo('transactions'); return; }
-  if (button.dataset.formType) { if (demoState.form.type !== button.dataset.formType) { demoState.form.type = button.dataset.formType; demoState.form.counterpart = ''; render(); } return; }
+  if (button.dataset.formType) { if (demoState.form.type !== button.dataset.formType) { demoState.form.type = button.dataset.formType; demoState.form.counterpart = ''; demoState.form.budget = ''; demoState.form.bill = ''; render(); } return; }
   switch (button.dataset.action) {
     case 'privacy': demoState.privateMode = !demoState.privateMode; render(); break;
     case 'theme': demoState.theme = demoState.theme === 'day' ? 'night' : 'day'; render(); break;
-    case 'previous-month': case 'next-month': { const month = new Date(demoState.year, demoState.month + (button.dataset.action === 'next-month' ? 1 : -1), 1); demoState.year = month.getFullYear(); demoState.month = month.getMonth(); render(); break; }
+    case 'previous-month': case 'next-month': { const month = new Date(demoState.year, demoState.month + (button.dataset.action === 'next-month' ? demoState.range : -demoState.range), 1); demoState.year = month.getFullYear(); demoState.month = month.getMonth(); render(); break; }
     case 'back': goTo(demoState.previous); break;
     case 'save': saveEntry(); break;
     case 'add-time': demoState.form.showTime = true; demoState.form.time = demoState.form.time || '12:00'; render(); document.querySelector('[data-form="time"]').showPicker(); break;
-    case 'pick-month': pickerYear = demoState.year; renderMonthPicker(); document.getElementById('month-dialog').showModal(); break;
+    case 'pick-month': pickerYear = demoState.year; pickerRange = demoState.range; renderMonthPicker(); document.getElementById('month-dialog').showModal(); break;
     case 'previous-year': pickerYear = Math.max(1, pickerYear - 1); renderMonthPicker(); break;
     case 'next-year': pickerYear = Math.min(9999, pickerYear + 1); renderMonthPicker(); break;
     case 'cancel-month': document.getElementById('month-dialog').close(); break;
@@ -355,9 +382,10 @@ document.addEventListener('click', (event) => {
     }
     case 'cancel-delete': document.getElementById('delete-confirmation').close(); break;
     case 'confirm-delete': {
-      const id = demoState.editingId;
-      if (id.startsWith('demo-')) demoState.extraEntries.set(periodKey(), (demoState.extraEntries.get(periodKey()) || []).filter((entry) => entry.id !== id));
-      else demoState.overrides.set(`${periodKey()}:${id}`, { deleted: true });
+      const id = demoState.editingOriginalId;
+      const key = demoState.editingPeriod;
+      if (id.startsWith('demo-')) demoState.extraEntries.set(key, (demoState.extraEntries.get(key) || []).filter((entry) => entry.id !== id));
+      else demoState.overrides.set(`${key}:${id}`, { deleted: true });
       document.getElementById('delete-confirmation').close();
       demoState.editingId = null;
       demoState.screen = 'transactions';

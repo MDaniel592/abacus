@@ -63,3 +63,6 @@ service-account.json
 detox_test.sh
 artifacts/
 .DS_Store
+
+# Installable APKs served by the local preview
+/design/downloads/

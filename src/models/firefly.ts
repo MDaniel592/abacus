@@ -4,6 +4,7 @@ import { exchangeCodeAsync, refreshAsync } from 'expo-auth-session';
 import { maxBy, minBy } from 'lodash';
 import semver from 'semver';
 import axios from 'axios';
+import periodBounds from '../lib/period';
 import {
   discovery, redirectUri, addCredential, replaceAccessToken,
 } from '../lib/oauth';
@@ -124,65 +125,15 @@ export default createModel<RootModel>()({
     async setRange(payload, rootState): Promise<void> {
       const {
         firefly: {
-          rangeDetails: { range: oldRange, start: oldStart, end: oldEnd },
+          rangeDetails: { range: oldRange, start: oldStart },
         },
       } = rootState;
       const { range = oldRange, direction } = payload;
 
-      let start: string;
-      let end: string;
-
-      const rangeInt = parseInt(range, 10);
-
-      if (payload.monthStart && moment(payload.monthStart, 'YYYY-MM-DD', true).isValid()) {
-        start = moment(payload.monthStart).startOf('month').format('YYYY-MM-DD');
-        end = moment(payload.monthStart).endOf('month').format('YYYY-MM-DD');
-      } else if (direction !== undefined) {
-        if (direction > 0) {
-          start = moment(oldStart).add(rangeInt, 'M').format('YYYY-MM-DD');
-          end = moment(oldEnd)
-            .add(rangeInt, 'M')
-            .endOf('M')
-            .format('YYYY-MM-DD');
-        } else {
-          start = moment(oldStart).subtract(rangeInt, 'M').format('YYYY-MM-DD');
-          end = moment(oldEnd)
-            .subtract(rangeInt, 'M')
-            .endOf('M')
-            .format('YYYY-MM-DD');
-        }
-      } else {
-        const today = new Date();
-        const month = today.getMonth();
-        const quarter = Math.floor((today.getMonth() + 3) / 3) - 1;
-        const semi = Math.floor((today.getMonth() + 6) / 6);
-
-        switch (rangeInt) {
-          case 1:
-            start = `${today.getFullYear()}-${(month + 1).toString().padStart(2, '0')}-01`;
-            end = `${today.getFullYear()}-${(month + 1).toString().padStart(2, '0')}-28`;
-            end = moment(end).endOf('M').format('YYYY-MM-DD');
-            break;
-          case 3:
-            start = `${today.getFullYear()}-${(quarter * 3 + 1).toString().padStart(2, '0')}-01`;
-            end = `${today.getFullYear()}-${((quarter + 1) * 3).toString().padStart(2, '0')}-28`;
-            end = moment(end).endOf('M').format('YYYY-MM-DD');
-            break;
-          case 6:
-            start = `${today.getFullYear()}-${semi === 1 ? '01' : '07'}-01`;
-            end = `${today.getFullYear()}-${semi === 1 ? '06' : '12'}-28`;
-            end = moment(end).endOf('M').format('YYYY-MM-DD');
-            break;
-          case 12:
-            start = `${today.getFullYear()}-01-01`;
-            end = `${today.getFullYear()}-12-31`;
-            break;
-          default:
-            start = `${today.getFullYear()}-01-01`;
-            end = `${today.getFullYear()}-12-31`;
-            break;
-        }
-      }
+      const rangeInt = [1, 3, 6, 12].includes(Number(range)) ? Number(range) : 1;
+      const selectedAnchor = payload.monthStart && moment(payload.monthStart, 'YYYY-MM-DD', true).isValid()
+        ? moment(payload.monthStart) : direction !== undefined ? moment(oldStart).add(direction > 0 ? rangeInt : -rangeInt, 'months') : moment();
+      const { start, end } = periodBounds(selectedAnchor.toDate(), rangeInt);
 
       const title: string = generateRangeTitle(rangeInt, start, end);
 
@@ -191,7 +142,7 @@ export default createModel<RootModel>()({
 
       dispatch.firefly.setRangeDetails({
         title,
-        range,
+        range: rangeInt,
         start,
         end,
       });

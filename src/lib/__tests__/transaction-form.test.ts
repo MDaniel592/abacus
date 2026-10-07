@@ -94,4 +94,21 @@ describe('changing transaction type without leaving the form', () => {
     expect(next[field]).toBe(id);
     expect(to === 'deposit' ? next.sourceId : to === 'withdrawal' ? next.destinationId : from === 'deposit' ? next.sourceId : next.destinationId).toBeNull();
   });
+  it.each(['withdrawal', 'deposit'])('saves a new %s using the default hidden counterparty', async (type) => {
+    const dispatch = { configuration: { apiPost: jest.fn().mockResolvedValue({ data: { id: '1' } }) } };
+    const split = {
+      ...initialSplit(),
+      type,
+      amount: '20',
+      description: 'Movimiento',
+      ...(type === 'withdrawal' ? { sourceId: 10, sourceName: 'Cuenta principal' } : { destinationId: 10, destinationName: 'Cuenta principal' }),
+    };
+    await transactions.effects(dispatch as never).upsertTransaction.bind({} as never)({ id: '-1' }, {
+      transactions: { transactionPayload: { title: '', transactions: [split] } },
+    });
+    const saved = dispatch.configuration.apiPost.mock.calls[0][0].body.transactions[0];
+    expect(type === 'withdrawal' ? saved.destination_name : saved.source_name).toBe('');
+    expect(type === 'withdrawal' ? saved.destination_id : saved.source_id).toBeNull();
+    expect(type === 'withdrawal' ? saved.source_id : saved.destination_id).toBe(10);
+  });
 });

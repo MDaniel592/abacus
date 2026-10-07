@@ -10,12 +10,13 @@ Revisión del código de navegación, inicio, categorías, movimientos, creació
 | --- | --- | --- |
 | Diseño | Cabeceras amplias y color naranja por defecto | Perspectiva morado, cabecera compacta, menos tarjetas anidadas, densidad uniforme en todas las vistas y contraste refinado |
 | Navegación | Pestaña de gráficos | Pestaña Categorías; botón central de añadir dentro de la barra |
-| Inicio | Periodo inicial trimestral | Periodo inicial mensual, balances por cuenta conservados, selector emergente de mes y año |
+| Inicio | Periodo inicial trimestral | Periodo inicial mensual, balances por cuenta conservados, selector emergente de mes/trimestre/semestre/año con elección de año |
 | Categorías | Opción de mostrar solo gastos | Ingresos y gastos siempre; balance total primero, diferencias con signo/color y barras con escala común entre categorías |
 | Movimientos | Filas de 90 px | Filas de 60 px, datos agrupados y precio rojo/verde/azul según el tipo |
 | Filtros | Cuenta, tipo, moneda, fecha y búsqueda | Se conservan y se añaden categoría y etiqueta combinables, incluida «sin categoría», manteniéndose al cargar más páginas |
 | Formulario | Detalles opcionales plegados | Categoría, presupuesto, factura, etiquetas y notas visibles; menos relleno y guardar accesible fuera del scroll |
 | Importe | Alineación lateral | Centrado y coloreado por tipo |
+| Cuentas del formulario | Origen y destino para todos los tipos | En gastos se oculta destino; en ingresos se oculta origen. Nuevos movimientos usan la contraparte predeterminada de Firefly III; editar conserva la contraparte existente. Transferencias muestran ambas cuentas |
 | Fecha/hora | Selectores del sistema | Selectores conservados, debajo del importe, fecha «7 oct 2026», más grande y sin iconos |
 | Autocompletado | Opciones de Firefly III | Se conserva la lista pulsable en descripción, cuentas, categoría, etiquetas, presupuesto y factura; se corrigen peticiones/callbacks obsoletos |
 | Privacidad | Ocultar saldo desde inicio | Modo privado en Ajustes junto a claro/oscuro/sistema; oculta importes en vistas de cuentas, categorías, movimientos, presupuestos, facturas y huchas, y oculta proporciones de las barras |
@@ -42,6 +43,6 @@ El formulario de edición sigue mostrando sus campos e importes para poder modif
 
 ## Verificaciones y límites
 
-13 pruebas unitarias para transiciones/envíos y búsqueda/paginación. ESLint, TypeScript y exportación Android. Prueba de navegador: meses y años, balances mensuales, botón añadir fijo y centrado, formulario compacto, sugerencias pulsables, fecha/hora, crear/editar/duplicar/eliminar/cancelar, barras/diferencias, filtros combinados, búsqueda, modo privado y tema oscuro.
+20 pruebas unitarias para transiciones/envíos y búsqueda/paginación. ESLint, TypeScript y exportación Android. Prueba de navegador: meses, trimestres, semestres y años, balances del periodo, botón añadir fijo y centrado, formulario compacto, sugerencias pulsables, fecha/hora, crear/editar/duplicar/eliminar/cancelar, barras/diferencias, filtros combinados, búsqueda, modo privado y tema oscuro.
 
-La demo usa datos ficticios en memoria. No reproduce toda la configuración, las múltiples partidas ni la conexión real. En la app nativa esos flujos se han conservado y revisado en código. No hay un APK generado ni una prueba en el S23 Ultra todavía. Queda la validación en el dispositivo con Firefly III: API y autocompletado reales, teclado, biometría, guardado/edición, firma y actualización del APK.
+La demo usa datos ficticios en memoria. Ajustes ya no contiene enlaces a las propuestas ni controles de restablecer datos de ejemplo. No reproduce toda la configuración, las múltiples partidas ni la conexión real. En la app nativa esos flujos se han conservado y revisado en código. No hay un APK generado ni una prueba en el S23 Ultra todavía. Queda la validación en el dispositivo con Firefly III: API y autocompletado reales, teclado, biometría, guardado/edición, firma y actualización del APK.

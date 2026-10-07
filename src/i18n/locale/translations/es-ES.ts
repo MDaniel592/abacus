@@ -1,6 +1,10 @@
 export default {
   transaction_form_add_time: 'Añadir hora',
   category_total_balance: 'Balance total',
+  period_month: 'Mes',
+  period_quarter: 'Trimestre',
+  period_half_year: 'Semestre',
+  period_year: 'Año',
   home_expenses_only: 'Solo gastos',
   transaction_filter_total: 'Total',
   transaction_filter_daily_average: 'Media diaria',
