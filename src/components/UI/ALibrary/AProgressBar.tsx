@@ -21,11 +21,10 @@ export default function AProgressBar({
     <View
       style={{
         width: '100%',
-        height: 7,
-        borderRadius: 5,
+        height: 5,
+        borderRadius: 3,
         overflow: 'hidden',
-        borderColor: colors.warmGray200,
-        borderWidth: 0.5,
+        backgroundColor: colors.brandNeutralLight,
         ...style,
       }}
     >
@@ -33,7 +32,7 @@ export default function AProgressBar({
         style={{
           height: '100%',
           width: `${value > 100 ? 100 : value}%`,
-          borderRadius: 5,
+          borderRadius: 3,
           backgroundColor: color,
         }}
       />

@@ -87,6 +87,7 @@ export default {
   auth_form_submit_button_initial: 'Iniciar sesión',
   auth_form_submit_button_loading: 'Enviando...',
   home_accounts: 'Cuentas',
+  home_all_accounts: 'Ver todas',
   layout_new_update_header: 'Nueva Actualización Disponible',
   layout_new_update_body_text: 'Siempre puedes actualizar más tarde en la pestaña de Ajustes.',
   layout_new_update_cancel_button: 'Cancelar',

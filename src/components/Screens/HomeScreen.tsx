@@ -30,10 +30,9 @@ import { useBrandStyle, useThemeColors } from '../../lib/common';
 
 import {
   AScrollView,
-  AStack,
   AText,
   AProgressBar,
-  ASkeleton, AStackFlex,
+  ASkeleton,
 } from '../UI/ALibrary';
 import DisplayAllAccountsSwitch from '../UI/DisplayAllAccountsSwitch';
 import ErrorBoundary from '../UI/ErrorBoundary';
@@ -88,65 +87,66 @@ function AssetsAccounts() {
       refreshControl={<RefreshControl refreshing={false} onRefresh={() => Promise.all([dispatch.accounts.getAccounts(), dispatch.firefly.getNetWorth()])} />}
     >
       <View style={{
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4,
       }}
       >
-        <View>
-          <AText fontSize={17} bold>{translate('home_accounts')}</AText>
-          <AText fontSize={11} color={colors.greyLight}>{translate('home_accounts_period')}</AText>
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <TouchableOpacity accessibilityLabel={translate('home_sort_name')} hitSlop={8} style={{ padding: 6 }} onPress={() => handleSortPress('left')}>
+            <MaterialCommunityIcons name="sort-alphabetical-ascending" size={20} color={lastPressed === 'left' ? selectedBrandStyle : colors.greyLight} />
+          </TouchableOpacity>
+          <TouchableOpacity accessibilityLabel={translate('home_sort_balance')} hitSlop={8} style={{ padding: 6 }} onPress={() => handleSortPress('right')}>
+            <MaterialCommunityIcons name="sort-numeric-descending" size={20} color={lastPressed === 'right' ? selectedBrandStyle : colors.greyLight} />
+          </TouchableOpacity>
         </View>
-        <DisplayAllAccountsSwitch />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <AText fontSize={12} color={colors.greyLight}>{translate('home_all_accounts')}</AText>
+          <DisplayAllAccountsSwitch />
+        </View>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-        <TouchableOpacity accessibilityLabel={translate('home_sort_name')} hitSlop={12} style={{ padding: 4 }} onPress={() => handleSortPress('left')}>
-          <MaterialCommunityIcons name="sort-alphabetical-ascending" size={22} color={lastPressed === 'left' ? selectedBrandStyle : colors.greyLight} />
-        </TouchableOpacity>
-        <TouchableOpacity accessibilityLabel={translate('home_sort_balance')} hitSlop={12} style={{ padding: 4 }} onPress={() => handleSortPress('right')}>
-          <MaterialCommunityIcons name="sort-numeric-descending" size={22} color={lastPressed === 'right' ? selectedBrandStyle : colors.greyLight} />
-        </TouchableOpacity>
-      </View>
-      {sortedAccounts.map((account) => {
-        const balance = parseFloat(account.attributes.currentBalance);
-        const difference = parseFloat(account.attributes.balanceDifference || '0');
-        return (
-          <View
-            key={account.id}
-            style={{
-              borderWidth: 1, borderColor: colors.listBorderColor, borderRadius: 10, padding: 9, marginBottom: 6, backgroundColor: colors.tileBackgroundColor,
-            }}
-          >
-            <View style={{
-              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-            }}
+      <View style={{
+        borderWidth: 1, borderColor: colors.listBorderColor, borderRadius: 12, backgroundColor: colors.tileBackgroundColor, overflow: 'hidden',
+      }}
+      >
+        {sortedAccounts.map((account, index) => {
+          const balance = parseFloat(account.attributes.currentBalance);
+          const difference = parseFloat(account.attributes.balanceDifference || '0');
+          return (
+            <View
+              key={account.id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderTopWidth: index === 0 ? 0 : 0.5,
+                borderColor: colors.listBorderColor,
+              }}
             >
-              <View style={{ flex: 1 }}>
-                <AText fontSize={13} bold numberOfLines={2}>
-                  {account.attributes.name}
-                  {account.attributes.includeNetWorth ? '' : ' *'}
-                </AText>
-                <AText fontSize={11} py={2} color={colors.greyLight}>{account.attributes.currencyCode}</AText>
-              </View>
+              <AText fontSize={13} numberOfLines={1} style={{ flex: 1 }}>
+                {account.attributes.name}
+                {account.attributes.includeNetWorth ? '' : ' *'}
+              </AText>
               <ASkeleton loading={loading}>
-                <AText fontSize={16} bold textAlign="right" numberOfLines={1} adjustsFontSizeToFit>{localNumberFormat(account.attributes.currencyCode, balance)}</AText>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <AText fontSize={14} bold numberOfLines={1}>{localNumberFormat(account.attributes.currencyCode, balance)}</AText>
+                  {difference !== 0 && (
+                  <AText fontSize={11} color={difference < 0 && account.attributes.type !== 'liabilities' ? colors.brandDanger : colors.brandSuccess}>
+                    {difference > 0 ? '+' : ''}
+                    {localNumberFormat(account.attributes.currencyCode, difference)}
+                  </AText>
+                  )}
+                </View>
               </ASkeleton>
             </View>
-            <View style={{
-              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-            }}
-            >
-              <AText fontSize={10} color={colors.greyLight}>{translate('home_period_change')}</AText>
-              <ASkeleton loading={loading}>
-                <AText fontSize={12} color={difference < 0 && account.attributes.type !== 'liabilities' ? colors.brandDanger : colors.brandSuccess}>
-                  {difference > 0 ? '+' : ''}
-                  {localNumberFormat(account.attributes.currencyCode, difference)}
-                </AText>
-              </ASkeleton>
-            </View>
-          </View>
-        );
-      })}
-      {!loading && sortedAccounts.length === 0 && <AText fontSize={13} py={24}>{translate('home_no_accounts')}</AText>}
-      <AText fontSize={10} py={10} color={colors.greyLight}>{translate('account_not_included_in_net_worth')}</AText>
+          );
+        })}
+        {!loading && sortedAccounts.length === 0 && <AText fontSize={13} py={24} textAlign="center">{translate('home_no_accounts')}</AText>}
+      </View>
+      {sortedAccounts.some((account) => !account.attributes.includeNetWorth) && (
+        <AText fontSize={10} py={8} color={colors.greyLight}>{translate('account_not_included_in_net_worth')}</AText>
+      )}
     </AScrollView>
   );
 }
@@ -208,13 +208,6 @@ function InsightCategories() {
       style={{ paddingHorizontal: 16, paddingBottom: 24 }}
       refreshControl={<RefreshControl refreshing={false} onRefresh={() => Promise.all([dispatch.categories.getInsightCategories(), dispatch.firefly.getNetWorth()])} />}
     >
-      <View style={{
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8,
-      }}
-      >
-        <AText fontSize={18} bold>{translate('navigation_categories_tab')}</AText>
-
-      </View>
       {total && renderRow(total, true)}
       <View style={{
         flexDirection: 'row', justifyContent: 'space-between', paddingTop: 7, paddingBottom: 2,
@@ -234,6 +227,44 @@ function InsightCategories() {
   );
 }
 
+type ProgressRowType = {
+  name: string
+  amount: string
+  badge: string
+  badgeColor: string
+  badgeBackground: string
+  barColor: string
+  value: number
+  loading: boolean
+}
+
+function ProgressRow({
+  name, amount, badge, badgeColor, badgeBackground, barColor, value, loading,
+}: ProgressRowType) {
+  return (
+    <View style={{ paddingVertical: 9 }}>
+      <View style={{
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6,
+      }}
+      >
+        <View style={{ flex: 1 }}>
+          <AText fontSize={13} numberOfLines={1}>{name}</AText>
+          <AText fontSize={11} numberOfLines={1} py={1}>{amount}</AText>
+        </View>
+        <ASkeleton loading={loading}>
+          <View style={{
+            paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6, backgroundColor: badgeBackground,
+          }}
+          >
+            <AText fontSize={12} numberOfLines={1} color={badgeColor} bold>{badge}</AText>
+          </View>
+        </ASkeleton>
+      </View>
+      <AProgressBar color={barColor} value={value} />
+    </View>
+  );
+}
+
 function InsightBudgets() {
   const localNumberFormat = usePrivateNumberFormat();
   const { colors } = useThemeColors();
@@ -245,7 +276,7 @@ function InsightBudgets() {
   return (
     <AScrollView
       showsVerticalScrollIndicator={false}
-      style={{ paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
+      style={{ paddingHorizontal: 16, paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
       refreshControl={(
         <RefreshControl
           refreshing={false}
@@ -256,57 +287,22 @@ function InsightBudgets() {
         />
       )}
     >
-      <AText fontSize={18} lineHeight={22} style={{ margin: 8 }} bold>
-        {translate('home_budgets')}
-      </AText>
-      {insightBudgets.filter((budget) => budget.attributes?.active).map((budget) => (
-        <AStack
-          key={budget.attributes.name}
-          mx={15}
-          style={{ height: 60 }}
-        >
-          <AStackFlex row justifyContent="space-between">
-            <AStack
-              style={{ maxWidth: '80%' }}
-              alignItems="flex-start"
-            >
-              <AText fontSize={13} lineHeight={22} numberOfLines={1}>
-                {budget.attributes.name}
-              </AText>
-              <AText fontSize={12} lineHeight={20} numberOfLines={1}>
-                {localNumberFormat(budget.currencyCode, budget.differenceFloat < 0 ? (budget.differenceFloat * -1) : budget.differenceFloat)}
-                {' / '}
-                {localNumberFormat(budget.currencyCode, budget.limit)}
-              </AText>
-            </AStack>
-
-            <ASkeleton loading={loading}>
-              <AStack alignItems="flex-end">
-                <AStack
-                  px={6}
-                  py={2}
-                  backgroundColor={-budget.differenceFloat > budget.limit ? colors.brandDangerLight : colors.brandSuccessLight}
-                  style={{ borderRadius: 5 }}
-                >
-                  <AText
-                    fontSize={15}
-                    numberOfLines={1}
-                    color={-budget.differenceFloat > budget.limit ? colors.brandDanger : colors.brandSuccess}
-                    style={{ textAlign: 'center' }}
-                    bold
-                  >
-                    {`${(budget.limit > 0 ? (((budget.differenceFloat * -1) * 100) / budget.limit).toFixed(0) : 0)}%`}
-                  </AText>
-                </AStack>
-              </AStack>
-            </ASkeleton>
-          </AStackFlex>
-          <AProgressBar
-            color={-budget.differenceFloat > budget.limit ? colors.red : colors.green}
+      {insightBudgets.filter((budget) => budget.attributes?.active).map((budget) => {
+        const over = -budget.differenceFloat > budget.limit;
+        return (
+          <ProgressRow
+            key={budget.attributes.name}
+            name={budget.attributes.name}
+            amount={`${localNumberFormat(budget.currencyCode, Math.abs(budget.differenceFloat))} / ${localNumberFormat(budget.currencyCode, budget.limit)}`}
+            badge={`${(budget.limit > 0 ? ((-budget.differenceFloat * 100) / budget.limit).toFixed(0) : 0)}%`}
+            badgeColor={over ? colors.brandDanger : colors.brandSuccess}
+            badgeBackground={over ? colors.brandDangerLight : colors.brandSuccessLight}
+            barColor={over ? colors.red : colors.green}
             value={((-budget.differenceFloat * 100) / budget.limit) || 0}
+            loading={loading}
           />
-        </AStack>
-      ))}
+        );
+      })}
     </AScrollView>
   );
 }
@@ -335,7 +331,7 @@ function Bills() {
   return (
     <AScrollView
       showsVerticalScrollIndicator={false}
-      style={{ paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
+      style={{ paddingHorizontal: 16, paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
       refreshControl={(
         <RefreshControl
           refreshing={loading}
@@ -346,9 +342,6 @@ function Bills() {
         />
       )}
     >
-      <AText fontSize={18} lineHeight={22} style={{ margin: 8 }} bold>
-        {translate('home_bills')}
-      </AText>
       {bills.map((bill) => {
         const amountPaid = parseFloat(bill.attributes.currentPaidAmount || '0');
         const amountMin = parseFloat(bill.attributes.amountMin);
@@ -362,55 +355,17 @@ function Bills() {
             : `${translate('due_by')} ${formatDate(bill.attributes.nextExpectedMatch)}`;
 
         return (
-          <AStack
+          <ProgressRow
             key={bill.id}
-            mx={15}
-            style={{
-              height: 60,
-            }}
-          >
-            <AStackFlex row justifyContent="space-between">
-              <AStack
-                style={{ maxWidth: '80%' }}
-                alignItems="flex-start"
-              >
-                <AText fontSize={13} lineHeight={22} numberOfLines={1}>
-                  {bill.attributes.name}
-                </AText>
-                <AText fontSize={12} lineHeight={20} numberOfLines={1}>
-                  {localNumberFormat(bill.attributes.currencyCode, amountPaid)}
-                  {' / '}
-                  {localNumberFormat(bill.attributes.currencyCode, amountMin)}
-                </AText>
-              </AStack>
-
-              <ASkeleton loading={loading}>
-                <AStack alignItems="flex-end">
-                  <AStack
-                    px={6}
-                    py={2}
-                    backgroundColor={isPaid ? colors.brandSuccessLight : colors.brandNeutralLight}
-                    style={{ borderRadius: 5 }}
-                  >
-                    <AText
-                      fontSize={15}
-                      numberOfLines={1}
-                      color={isPaid ? colors.brandSuccess : colors.brandNeutral}
-                      style={{ textAlign: 'center' }}
-                      bold
-                    >
-                      {statusText}
-                    </AText>
-                  </AStack>
-                </AStack>
-              </ASkeleton>
-            </AStackFlex>
-
-            <AProgressBar
-              color={percentagePaid >= 50.0 ? colors.green : colors.brandWarning}
-              value={percentagePaid}
-            />
-          </AStack>
+            name={bill.attributes.name}
+            amount={`${localNumberFormat(bill.attributes.currencyCode, amountPaid)} / ${localNumberFormat(bill.attributes.currencyCode, amountMin)}`}
+            badge={statusText}
+            badgeColor={isPaid ? colors.brandSuccess : colors.brandNeutral}
+            badgeBackground={isPaid ? colors.brandSuccessLight : colors.brandNeutralLight}
+            barColor={percentagePaid >= 50.0 ? colors.green : colors.brandWarning}
+            value={percentagePaid}
+            loading={loading}
+          />
         );
       })}
     </AScrollView>
@@ -428,7 +383,7 @@ function PiggyBanks() {
   return (
     <AScrollView
       showsVerticalScrollIndicator={false}
-      style={{ paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
+      style={{ paddingHorizontal: 16, paddingBottom: tabBarHeight + EXTRA_SCROLL_PADDING }}
       refreshControl={(
         <RefreshControl
           refreshing={false}
@@ -439,59 +394,18 @@ function PiggyBanks() {
         />
       )}
     >
-      <AText fontSize={18} lineHeight={22} style={{ margin: 8 }} bold>
-        {translate('home_piggy_banks')}
-      </AText>
       {piggyBanks.filter((pb) => pb.attributes?.percentage).map((pb) => (
-        <AStack
+        <ProgressRow
           key={pb.id}
-          mx={15}
-          style={{
-            height: 60,
-          }}
-        >
-          <AStackFlex row justifyContent="space-between">
-            <AStack
-              style={{ maxWidth: '80%' }}
-              alignItems="flex-start"
-            >
-              <AText fontSize={13} lineHeight={22} numberOfLines={1}>
-                {pb.attributes.name}
-              </AText>
-              <AText fontSize={12} lineHeight={20} numberOfLines={1}>
-                {localNumberFormat(pb.attributes.currencyCode, pb.attributes.currentAmount)}
-                {' / '}
-                {localNumberFormat(pb.attributes.currencyCode, pb.attributes.targetAmount)}
-              </AText>
-            </AStack>
-
-            <ASkeleton loading={loading}>
-              <AStack alignItems="flex-end">
-                <AStack
-                  px={6}
-                  py={2}
-                  backgroundColor={pb.attributes.leftToSave > 0.0 ? colors.brandNeutralLight : colors.brandSuccessLight}
-                  style={{ borderRadius: 5 }}
-                >
-                  <AText
-                    fontSize={15}
-                    numberOfLines={1}
-                    color={pb.attributes.leftToSave > 0.0 ? colors.brandNeutral : colors.brandSuccess}
-                    style={{ textAlign: 'center' }}
-                    bold
-                  >
-                    {`${pb.attributes.percentage?.toFixed(0)}%`}
-                  </AText>
-                </AStack>
-              </AStack>
-            </ASkeleton>
-          </AStackFlex>
-
-          <AProgressBar
-            color={pb.attributes.percentage > 50.0 ? colors.green : colors.brandWarning}
-            value={pb.attributes.percentage}
-          />
-        </AStack>
+          name={pb.attributes.name}
+          amount={`${localNumberFormat(pb.attributes.currencyCode, pb.attributes.currentAmount)} / ${localNumberFormat(pb.attributes.currencyCode, pb.attributes.targetAmount)}`}
+          badge={`${pb.attributes.percentage?.toFixed(0)}%`}
+          badgeColor={pb.attributes.leftToSave > 0.0 ? colors.brandNeutral : colors.brandSuccess}
+          badgeBackground={pb.attributes.leftToSave > 0.0 ? colors.brandNeutralLight : colors.brandSuccessLight}
+          barColor={pb.attributes.percentage > 50.0 ? colors.green : colors.brandWarning}
+          value={pb.attributes.percentage}
+          loading={loading}
+        />
       ))}
     </AScrollView>
   );
@@ -499,7 +413,7 @@ function PiggyBanks() {
 
 function NetWorth() {
   const localNumberFormat = usePrivateNumberFormat();
-  const { colors, colorScheme } = useThemeColors();
+  const { colorScheme } = useThemeColors();
   const hideBalance = useSelector((state: RootState) => state.configuration.hideBalance);
   const netWorth = useSelector((state: RootState) => state.firefly.netWorth);
   const earned = useSelector((state: RootState) => state.firefly.earned);
@@ -508,41 +422,37 @@ function NetWorth() {
   const loading = useSelector((state: RootState) => state.loading.effects.firefly.getNetWorth?.loading);
 
   return (
-    <View testID="home_screen_net_worth" style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 9 }}>
-      <View>
-        <LinearGradient
-          colors={colorScheme === 'dark' ? ['#523B88', '#7054AB'] : ['#6446B8', '#7B58CC']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 14, padding: 12 }}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <AText fontSize={12} color="white">{translate('home_net_worth')}</AText>
-          </View>
-          <ASkeleton loading={loading}>
-            <AText fontSize={27} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} py={5}>
-              {hideBalance ? '••••••' : localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
-            </AText>
-          </ASkeleton>
-        </LinearGradient>
-      </View>
-      <View style={{ flexDirection: 'row', gap: 10, marginTop: 7 }}>
-        {[{ label: 'home_income', data: earned, color: colors.brandSuccess }, { label: 'home_expenses', data: spent, color: colors.brandDanger }].map((metric) => (
-          <View
-            key={metric.label}
-            style={{
-              flex: 1, borderRadius: 10, backgroundColor: colors.tileBackgroundColor, borderWidth: 1, borderColor: colors.listBorderColor, padding: 8,
-            }}
-          >
-            <AText fontSize={11} color={colors.greyLight}>{translate(metric.label)}</AText>
-            <ASkeleton loading={loading}>
-              <AText fontSize={16} color={metric.color} bold py={5} numberOfLines={1} adjustsFontSizeToFit>
-                {hideBalance ? '••••' : localNumberFormat(currentCode, Math.abs(parseFloat(metric.data[0]?.monetaryValue || '0')))}
-              </AText>
-            </ASkeleton>
-          </View>
-        ))}
-      </View>
+    <View testID="home_screen_net_worth" style={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 }}>
+      <LinearGradient
+        colors={colorScheme === 'dark' ? ['#523B88', '#7054AB'] : ['#6446B8', '#7B58CC']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 }}
+      >
+        <AText fontSize={12} color="white">{translate('home_net_worth')}</AText>
+        <ASkeleton loading={loading}>
+          <AText fontSize={26} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} py={2}>
+            {hideBalance ? '••••••' : localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
+          </AText>
+        </ASkeleton>
+        <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
+          {[{
+            label: 'home_income', data: earned, icon: 'arrow-up', iconColor: '#A7F3C4',
+          }, {
+            label: 'home_expenses', data: spent, icon: 'arrow-down', iconColor: '#FFC2C2',
+          }].map((metric) => (
+            <View key={metric.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <MaterialCommunityIcons name={metric.icon as 'arrow-up' | 'arrow-down'} size={14} color={metric.iconColor} />
+              <AText fontSize={12} color="white">{translate(metric.label)}</AText>
+              <ASkeleton loading={loading}>
+                <AText fontSize={13} color="white" bold numberOfLines={1}>
+                  {hideBalance ? '••••' : localNumberFormat(currentCode, Math.abs(parseFloat(metric.data[0]?.monetaryValue || '0')))}
+                </AText>
+              </ASkeleton>
+            </View>
+          ))}
+        </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -566,7 +476,7 @@ export default function HomeScreen() {
   const dispatch = useDispatch<RootDispatch>();
   const viewPagerRef = useRef<PagerView>(null);
   const [selectedPage, setSelectedPage] = useState(0);
-  const pages = ['home_accounts', 'transaction_form_category_label', 'home_budgets', 'home_bills', 'home_piggy_banks'];
+  const pages = ['home_accounts', 'home_budgets', 'home_bills', 'home_piggy_banks'];
 
   useEffect(() => {
     Promise.all([dispatch.currencies.getCurrencies(), dispatch.configuration.getCurrentApiVersion()]).catch(() => {});
@@ -589,7 +499,7 @@ export default function HomeScreen() {
     <View style={{ flex: 1, backgroundColor: colors.backgroundColor }}>
       <ErrorBoundary>
         <NetWorth />
-        <View style={{ paddingBottom: 8 }}>
+        <View style={{ paddingBottom: 6 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 6 }}>
             {pages.map((label, index) => (
               <Pressable
@@ -598,17 +508,16 @@ export default function HomeScreen() {
                 accessibilityState={{ selected: selectedPage === index }}
                 onPress={() => { setSelectedPage(index); viewPagerRef.current?.setPage(index); }}
                 style={{
-                  backgroundColor: selectedPage === index ? brandStyle : colors.tileBackgroundColor, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 9,
+                  backgroundColor: selectedPage === index ? brandStyle : colors.tileBackgroundColor, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8,
                 }}
               >
-                <AText fontSize={11} color={selectedPage === index ? brandStyleContrast : colors.greyLight} bold>{translate(label)}</AText>
+                <AText fontSize={12} color={selectedPage === index ? brandStyleContrast : colors.text} bold={selectedPage === index}>{translate(label)}</AText>
               </Pressable>
             ))}
           </ScrollView>
         </View>
         <PagerView ref={viewPagerRef} initialPage={0} style={{ flex: 1 }} onPageSelected={(event) => setSelectedPage(event.nativeEvent.position)}>
           <View key="accounts" style={{ flex: 1 }} collapsable={false}><AssetsAccounts /></View>
-          <View key="categories" style={{ flex: 1 }} collapsable={false}><InsightCategories /></View>
           <View key="budgets" style={{ flex: 1 }} collapsable={false}><InsightBudgets /></View>
           <View key="bills" style={{ flex: 1 }} collapsable={false}><Bills /></View>
           <View key="piggy" style={{ flex: 1 }} collapsable={false}><PiggyBanks /></View>

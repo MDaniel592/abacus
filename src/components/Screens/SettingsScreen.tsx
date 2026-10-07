@@ -178,6 +178,28 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           <AText fontSize={14}>{translate('configuration_private_mode')}</AText>
           <Switch accessibilityLabel={translate('configuration_private_mode')} thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} value={hideBalance} onValueChange={(value) => { dispatch.configuration.setHideBalance(value); }} />
         </AStack>
+        <APressable
+          flexDirection="row"
+          onPress={() => navigation.navigate('SettingsColorSelectionScreen', { filterType: '', selectFilter: () => {} })}
+          style={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: 42,
+            marginLeft: 10,
+            marginRight: 10,
+            borderTopWidth: 0.5,
+            borderColor: colors.listBorderColor,
+          }}
+        >
+          <AText fontSize={14}>{translate('configuration_theme_selection')}</AText>
+          <AStack row>
+            <AView style={{
+              width: 18, height: 18, borderRadius: 9, backgroundColor: selectedBrandStyle, marginRight: 8,
+            }}
+            />
+            <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
+          </AStack>
+        </APressable>
       </AView>
       <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_security')}
@@ -219,7 +241,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           }}
         >
           <AText fontSize={14}>{translate('configuration_manage_credentials')}</AText>
-          <FontAwesome name="angle-right" size={22} color="gray" />
+          <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
         <AStack
           row
@@ -350,35 +372,6 @@ export default function SettingsScreen({ navigation }: ScreenType) {
       </AView>
 
       <AText py={8} px={10} fontSize={16} bold>
-        {translate('configuration_theme')}
-      </AText>
-      <AView
-        style={{
-          borderTopWidth: 0.5,
-          borderBottomWidth: 0.5,
-          borderColor: colors.listBorderColor,
-          backgroundColor: colors.tileBackgroundColor,
-        }}
-      >
-        <APressable
-          flexDirection="row"
-          onPress={() => navigation.navigate('SettingsColorSelectionScreen', { filterType: '', selectFilter: () => {} })}
-          style={{
-            justifyContent: 'space-between',
-            height: 42,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginLeft: 10,
-            borderBottomWidth: 0.5,
-            borderColor: colors.listBorderColor,
-          }}
-        >
-          <AText fontSize={14}>{translate('configuration_theme_selection')}</AText>
-          <FontAwesome name="angle-right" size={22} color="gray" />
-        </APressable>
-      </AView>
-
-      <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_debug')}
       </AText>
       <AView
@@ -403,7 +396,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           }}
         >
           <AText fontSize={14}>{translate('configuration_get_help')}</AText>
-          <FontAwesome name="angle-right" size={22} color="gray" />
+          <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
         <APressable
           flexDirection="row"
@@ -419,7 +412,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           }}
         >
           <AText fontSize={14}>{translate('configuration_clear_option')}</AText>
-          <FontAwesome name="angle-right" size={22} color="gray" />
+          <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
         <APressable
           flexDirection="row"
@@ -433,7 +426,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           }}
         >
           <AText fontSize={14}>{translate('go_to_credentials')}</AText>
-          <FontAwesome name="angle-right" size={22} color="gray" />
+          <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
       </AView>
 
