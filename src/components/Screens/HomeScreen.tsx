@@ -418,8 +418,12 @@ function NetWorth() {
   const netWorth = useSelector((state: RootState) => state.firefly.netWorth);
   const earned = useSelector((state: RootState) => state.firefly.earned);
   const spent = useSelector((state: RootState) => state.firefly.spent);
+  const balance = useSelector((state: RootState) => state.firefly.balance);
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
   const loading = useSelector((state: RootState) => state.loading.effects.firefly.getNetWorth?.loading);
+  const income = Math.abs(parseFloat(earned[0]?.monetaryValue || '0'));
+  const expenses = Math.abs(parseFloat(spent[0]?.monetaryValue || '0'));
+  const difference = balance[0] ? parseFloat(balance[0].monetaryValue) : income - expenses;
 
   return (
     <View testID="home_screen_net_worth" style={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 }}>
@@ -435,22 +439,40 @@ function NetWorth() {
             {hideBalance ? '••••••' : localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
           </AText>
         </ASkeleton>
-        <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
-          {[{
-            label: 'home_income', data: earned, icon: 'arrow-up', iconColor: '#A7F3C4',
-          }, {
-            label: 'home_expenses', data: spent, icon: 'arrow-down', iconColor: '#FFC2C2',
-          }].map((metric) => (
-            <View key={metric.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <MaterialCommunityIcons name={metric.icon as 'arrow-up' | 'arrow-down'} size={14} color={metric.iconColor} />
-              <AText fontSize={12} color="white">{translate(metric.label)}</AText>
-              <ASkeleton loading={loading}>
-                <AText fontSize={13} color="white" bold numberOfLines={1}>
-                  {hideBalance ? '••••' : localNumberFormat(currentCode, Math.abs(parseFloat(metric.data[0]?.monetaryValue || '0')))}
-                </AText>
-              </ASkeleton>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 6,
+        }}
+        >
+          <View style={{
+            flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1,
+          }}
+          >
+            {[{
+              label: 'home_income', value: income, icon: 'arrow-up', iconColor: '#A7F3C4',
+            }, {
+              label: 'home_expenses', value: expenses, icon: 'arrow-down', iconColor: '#FFC2C2',
+            }].map((metric) => (
+              <View key={metric.label} accessible accessibilityLabel={translate(metric.label)} style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <MaterialCommunityIcons name={metric.icon as 'arrow-up' | 'arrow-down'} size={14} color={metric.iconColor} />
+                <ASkeleton loading={loading}>
+                  <AText fontSize={13} color="white" numberOfLines={1}>
+                    {hideBalance ? '••••' : localNumberFormat(currentCode, metric.value)}
+                  </AText>
+                </ASkeleton>
+              </View>
+            ))}
+          </View>
+          <ASkeleton loading={loading}>
+            {/* Fixed light pill: the card is purple in both themes. */}
+            <View style={{
+              paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: difference < 0 ? '#FFE5E5' : '#E3F8EC',
+            }}
+            >
+              <AText fontSize={13} bold color={difference < 0 ? '#C81E1E' : '#15803D'} numberOfLines={1}>
+                {hideBalance ? '••••' : `${difference > 0 ? '+' : ''}${localNumberFormat(currentCode, difference)}`}
+              </AText>
             </View>
-          ))}
+          </ASkeleton>
         </View>
       </LinearGradient>
     </View>
