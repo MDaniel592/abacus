@@ -1,4 +1,5 @@
 export default {
+  transaction_form_optional_details: 'Detalles opcionales',
   configuration_app_version: 'Versión de aplicación',
   configuration_about: 'Acerca de Abacus',
   configuration_clear_option: 'Borrar datos y restablecer aplicación',
@@ -30,7 +31,7 @@ export default {
   transaction_form_category_label: 'Categoría',
   transaction_form_budget_label: 'Presupuesto',
   transaction_form_reset_button: 'Restablecer',
-  transaction_form_submit_button: 'Enviar',
+  transaction_form_submit_button: 'Guardar',
   transaction_list_alert_title: '¿Estás seguro/a?',
   transaction_list_alert_text: 'Esta transacción será permanentemente eliminada:',
   transaction_list_delete_button: 'Eliminar',
@@ -56,9 +57,9 @@ export default {
   navigation_create_tab: 'Crear',
   navigation_transactions_tab: 'Transacciones',
   navigation_settings_tab: 'Ajustes',
-  transaction_form_type_withdrawal: 'Retirar',
-  transaction_form_type_deposit: 'Depositar',
-  transaction_form_type_transfer: 'Transferir',
+  transaction_form_type_withdrawal: 'Gasto',
+  transaction_form_type_deposit: 'Ingreso',
+  transaction_form_type_transfer: 'Traspaso',
 
   // from 0.7.0
   home_budgets: 'Presupuestos',

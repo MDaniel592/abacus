@@ -1,4 +1,5 @@
 export default {
+  transaction_form_optional_details: 'Optional details',
   configuration_app_version: 'App Version',
   configuration_about: 'About',
   configuration_clear_option: 'Clear cache',

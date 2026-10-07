@@ -1,4 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 
@@ -17,7 +19,7 @@ import {
 
 type AutocompleteType = {
   name: string,
-  id: string,
+  id?: string,
 }
 
 export default function AutocompleteField({
@@ -40,7 +42,14 @@ export default function AutocompleteField({
   const [multipleValue, setMultipleValue] = useState('');
   const [autocompletes, setAutocompletes] = useState([]);
   const [displayAutocomplete, setDisplayAutocomplete] = useState(false);
-  const refreshAutocomplete = async (query) => {
+  const pendingRequest = useRef<AbortController | null>(null);
+
+  useEffect(() => () => pendingRequest.current?.abort(), []);
+
+  const refreshAutocomplete = useCallback(async (query) => {
+    pendingRequest.current?.abort();
+    const controller = new AbortController();
+    pendingRequest.current = controller;
     const limit = 10;
     const accountTypeFilter = {
       'source-withdrawal': 'Asset%20account',
@@ -51,9 +60,19 @@ export default function AutocompleteField({
       'destination-transfer': 'Asset%20account',
     };
     const types = routeApi === 'accounts' ? `&types=${accountTypeFilter[`${designation}-${splitType}`]},Loan,Debt,Mortgage` : '';
-    const response = await axios.get(`${backendURL}/api/v1/autocomplete/${routeApi}?limit=${limit}${types}&query=${encodeURIComponent(query)}`);
-    setAutocompletes(convertKeysToCamelCase(response.data));
-  };
+    try {
+      const response = await axios.get(`${backendURL}/api/v1/autocomplete/${routeApi}?limit=${limit}${types}&query=${encodeURIComponent(query)}`, {
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted) {
+        setAutocompletes(convertKeysToCamelCase(response.data));
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setAutocompletes([]);
+      }
+    }
+  }, [backendURL, routeApi, designation, splitType]);
 
   const handleChangeText = useCallback((text: string) => {
     if (multiple) {
@@ -62,7 +81,7 @@ export default function AutocompleteField({
       onChangeText(text);
     }
     refreshAutocomplete(text);
-  }, [multiple, onChangeText]);
+  }, [multiple, onChangeText, refreshAutocomplete]);
 
   const handleSelectAutocomplete = useCallback(async (autocomplete: AutocompleteType) => {
     onSelectAutocomplete(autocomplete);
@@ -72,7 +91,7 @@ export default function AutocompleteField({
     } else {
       setDisplayAutocomplete(false);
     }
-  }, [onSelectAutocomplete]);
+  }, [onSelectAutocomplete, multiple, refreshAutocomplete]);
 
   const handleDeleteMultiple = useCallback((item) => {
     onDeleteMultiple(item);
@@ -83,89 +102,75 @@ export default function AutocompleteField({
     refreshAutocomplete(value && !small && !multiple ? value : '');
   };
   const handleBlur = () => {
+    pendingRequest.current?.abort();
     setDisplayAutocomplete(false);
   };
 
-  return useMemo(
-    () => (
-      <AFormView>
-        {!small && (
-          <ALabel isRequired={isRequired}>
-            {label}
-          </ALabel>
-        )}
+  return (
+    <AFormView>
+      {!small && (
+      <ALabel isRequired={isRequired}>
+        {label}
+      </ALabel>
+      )}
 
-        {multiple && (value.map((item: string, index: number) => (
-          <AView key={`${index + 1}${item}`} style={{ width: '100%' }}>
-            <AView
-              style={{
-                height: 30,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                borderRadius: 10,
-                paddingHorizontal: 0,
-                marginBottom: 5,
-                backgroundColor: colors.brandNeutralFix,
-              }}
+      {multiple && (value.map((item: string, index: number) => (
+        <AView key={`${index + 1}${item}`} style={{ width: '100%' }}>
+          <AView
+            style={{
+              height: 30,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              borderRadius: 10,
+              paddingHorizontal: 0,
+              marginBottom: 5,
+              backgroundColor: colors.brandNeutralFix,
+            }}
+          >
+            <EvilIcons name="tag" size={24} color={colors.brandDark} />
+            <AText px={5} fontSize={15} lineHeight={20} color={colors.brandDark} numberOfLines={1} maxWidth={200} bold>{item}</AText>
+            <AIconButton
+              icon={<AntDesign name="close-circle" size={19} color={colors.greyLight} />}
+              onPress={() => handleDeleteMultiple(item)}
+            />
+          </AView>
+        </AView>
+      )))}
+
+      <AInput
+        height={40}
+        returnKeyType="done"
+        onSubmitEditing={({ nativeEvent: { text } }) => ((multiple && text !== '') ? handleSelectAutocomplete({ name: text }) : null)}
+        placeholder={placeholder}
+        value={!multiple ? value : multipleValue}
+        onChangeText={handleChangeText}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        InputRightElement={InputRightElement}
+      />
+
+      {displayAutocomplete && (
+      <AView style={{ maxWidth: '100%' }}>
+        {autocompletes.map((autocomplete: AutocompleteType) => (
+          <APressable
+            style={{ borderRadius: 10, paddingLeft: 5 }}
+            key={autocomplete.id}
+            onPress={() => handleSelectAutocomplete(autocomplete)}
+          >
+            <AStack
+              justifyContent="space-between"
+              mx={5}
+              my={5}
             >
-              <EvilIcons name="tag" size={24} color={colors.brandDark} />
-              <AText px={5} fontSize={15} lineHeight={20} color={colors.brandDark} numberOfLines={1} maxWidth={200} bold>{item}</AText>
-              <AIconButton
-                icon={<AntDesign name="close-circle" size={19} color={colors.greyLight} />}
-                onPress={() => handleDeleteMultiple(item)}
-              />
-            </AView>
-          </AView>
-        )))}
-
-        <AInput
-          height={40}
-          returnKeyType="done"
-          onSubmitEditing={({ nativeEvent: { text } }) => ((multiple && text !== '') ? handleSelectAutocomplete({ name: text }) : null)}
-          placeholder={placeholder}
-          value={!multiple ? value : multipleValue}
-          onChangeText={handleChangeText}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          InputRightElement={InputRightElement}
-        />
-
-        {displayAutocomplete && (
-          <AView style={{ maxWidth: '100%' }}>
-            {autocompletes.map((autocomplete: AutocompleteType) => (
-              <APressable
-                style={{ borderRadius: 10, paddingLeft: 5 }}
-                key={autocomplete.id}
-                onPress={() => handleSelectAutocomplete(autocomplete)}
-              >
-                <AStack
-                  justifyContent="space-between"
-                  mx={5}
-                  my={5}
-                >
-                  <AText fontSize={15} numberOfLines={1} underline>
-                    {autocomplete.name || '-'}
-                  </AText>
-                </AStack>
-              </APressable>
-            ))}
-          </AView>
-        )}
-      </AFormView>
-    ),
-    [
-      isRequired,
-      label,
-      placeholder,
-      multiple,
-      value,
-      designation,
-      small,
-      splitType,
-      multipleValue,
-      autocompletes,
-      displayAutocomplete,
-    ],
+              <AText fontSize={15} numberOfLines={1} underline>
+                {autocomplete.name || '-'}
+              </AText>
+            </AStack>
+          </APressable>
+        ))}
+      </AView>
+      )}
+    </AFormView>
   );
 }

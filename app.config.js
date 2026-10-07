@@ -1,7 +1,9 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
+const EAS_PROJECT_ID = 'ef46b4e9-771d-4e19-ada2-5946ddfb078f';
 
 export default {
-  name: IS_DEV ? 'Abacus.dev' : 'Abacus',
+  name: IS_DEV ? 'Abacus Personal.dev' : 'Abacus Personal',
+  owner: 'mmdaniel',
   description: 'Abacus: Firefly III mobile application.',
   slug: 'abacus',
   privacy: 'public',
@@ -12,9 +14,7 @@ export default {
   version: '0.25.0',
   orientation: 'portrait',
   updates: {
-    enabled: true,
-    checkAutomatically: 'ON_ERROR_RECOVERY',
-    url: 'https://u.expo.dev/292ed6dc-804c-4444-95f5-fa5d76d9913b',
+    enabled: false,
   },
   ios: {
     icon: './src/images/icon-abacus.png',
@@ -37,7 +37,7 @@ export default {
     config: {
       usesNonExemptEncryption: false,
     },
-    bundleIdentifier: IS_DEV ? 'abacus.fireflyiii.ios.app.dev' : 'abacus.ios.app',
+    bundleIdentifier: IS_DEV ? 'io.github.mdaniel592.abacus.dev' : 'io.github.mdaniel592.abacus',
     buildNumber: '0.25.0',
   },
   android: {
@@ -55,17 +55,17 @@ export default {
       },
     },
     playStoreUrl: 'https://play.google.com/store/apps/details?id=abacus.fireflyiii.android.app',
-    package: IS_DEV ? 'abacus.fireflyiii.android.app.dev' : 'abacus.fireflyiii.android.app',
+    package: IS_DEV ? 'io.github.mdaniel592.abacus.dev' : 'io.github.mdaniel592.abacus',
     versionCode: 41,
   },
-  scheme: 'abacusfiiiapp',
-  githubUrl: 'https://github.com/victorbalssa/abacus',
+  scheme: 'abacuspersonal',
+  githubUrl: 'https://github.com/MDaniel592/abacus',
   runtimeVersion: {
     policy: 'sdkVersion',
   },
   extra: {
     eas: {
-      projectId: '292ed6dc-804c-4444-95f5-fa5d76d9913b',
+      projectId: EAS_PROJECT_ID,
     },
   },
   plugins: [

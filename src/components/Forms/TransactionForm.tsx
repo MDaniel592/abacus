@@ -1,7 +1,8 @@
 import React, {
   useEffect,
   useLayoutEffect,
-  useMemo,
+  useCallback,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -22,6 +23,8 @@ import { initialSplit } from '../../models/transactions';
 import { AStackFlex, AText, AView } from '../UI/ALibrary';
 import AButton from '../UI/ALibrary/AButton';
 import { useThemeColors } from '../../lib/common';
+
+const EMPTY_SPLITS = [];
 
 function MultipleTransactionSplitForm({ isNew, splits, title }) {
   const { colors } = useThemeColors();
@@ -67,7 +70,7 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
       ))}
       <AButton
         style={{
-          height: 40,
+          height: 48,
           marginTop: 5,
           borderWidth: 0.5,
           borderColor: colors.listBorderColor,
@@ -79,7 +82,7 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
           <AText color={colors.greyLight} fontSize={15}>{translate('transaction_form_new_split_button')}</AText>
         </AStackFlex>
       </AButton>
-      <GroupTitle title={title || ''} />
+      {splitNumber.length > 1 && <GroupTitle title={title || ''} />}
       <AStackFlex row py={10} alignItems="center" justifyContent="space-between">
         <AText color={colors.greyLight} fontSize={14} bold>{translate('transaction_form_foreign_currency_label')}</AText>
         <Switch thumbColor="white" trackColor={{ false: '#767577', true: colors.brandStyle }} onValueChange={onSwitch} value={displayForeignCurrency} />
@@ -92,7 +95,7 @@ function TransactionFormButtons({ handleSubmit }) {
   const loading = useSelector((state: RootState) => state.loading.effects.transactions.upsertTransaction?.loading);
 
   return (
-    <AButton type="primary" loading={loading} style={{ height: 40, marginTop: 5 }} onPress={handleSubmit}>
+    <AButton type="primary" loading={loading} disabled={loading} style={{ height: 52, marginTop: 12 }} onPress={handleSubmit}>
       <AStackFlex row>
         <Ionicons name="cloud-upload-sharp" size={20} color="white" style={{ margin: 5 }} />
         <AText color="white" fontSize={15}>{translate('transaction_form_submit_button')}</AText>
@@ -104,19 +107,24 @@ function TransactionFormButtons({ handleSubmit }) {
 export default function TransactionForm({
   navigation,
   title,
-  splits = [],
+  splits = EMPTY_SPLITS,
   id = '-1',
 }) {
   const { colors } = useThemeColors();
   const dispatch = useDispatch<RootDispatch>();
   const loading = useSelector((state: RootState) => state.loading.effects.transactions.upsertTransaction?.loading);
+  const submitting = useRef(false);
   const closeTransactionScreen = useSelector((state: RootState) => state.configuration.closeTransactionScreen);
 
   useEffect(() => {
     dispatch.transactions.resetTransaction({ splits, title });
   }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
+    if (submitting.current) {
+      return;
+    }
+    submitting.current = true;
     Keyboard.dismiss();
     try {
       await dispatch.transactions.upsertTransaction({ id });
@@ -126,8 +134,10 @@ export default function TransactionForm({
       }
     } catch (e) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch();
+    } finally {
+      submitting.current = false;
     }
-  };
+  }, [dispatch, id, closeTransactionScreen, navigation]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -135,27 +145,24 @@ export default function TransactionForm({
         loading ? <ActivityIndicator size="small" color={colors.text} /> : <AText onPress={handleSubmit} fontSize={16} bold>{translate('transaction_form_submit_button')}</AText>
       ),
     });
-  }, [navigation, dispatch, title, splits, id, loading]);
+  }, [navigation, loading, colors.text, handleSubmit]);
 
-  return useMemo(
-    () => (
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.select({ ios: 'padding', android: 'height' })}
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.select({ ios: 'padding', android: 'height' })}
+    >
+      <ScrollView
+        style={{
+          flex: 1,
+        }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        bounces={false}
       >
-        <ScrollView
-          style={{
-            padding: 10,
-          }}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
-        >
-          <MultipleTransactionSplitForm isNew={id === '-1'} title={title} splits={splits} />
-          <TransactionFormButtons handleSubmit={handleSubmit} />
-          <AView style={{ height: 170 }} />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    ),
-    [],
+        <MultipleTransactionSplitForm isNew={id === '-1'} title={title} splits={splits} />
+        <TransactionFormButtons handleSubmit={handleSubmit} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

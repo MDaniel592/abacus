@@ -9,12 +9,13 @@
     "ios": "expo run:ios",
     "lint": "eslint --config .eslintrc.json .",
     "lint-with-results": "eslint --config .eslintrc.json --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif .",
-    "start": "expo start --dev-client"
+    "start": "expo start --dev-client",
+    "test:unit": "jest src/lib/__tests__ --runInBand"
   },
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|victory|react-native-svg|react-clone-referenced-element|expo(nent)?|@expo(nent)?/.*|react-navigation|redux-persist|native-base(-shoutem-theme)|native-base))"
+      "node_modules/(?!((jest-)?react-native|@react-native/.*|victory|react-native-svg|react-clone-referenced-element|expo(nent)?|@expo(nent)?/.*|react-navigation|redux-persist|native-base(-shoutem-theme)|native-base))"
     ]
   },
   "dependencies": {

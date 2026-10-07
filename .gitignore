@@ -7,7 +7,6 @@ npm-debug.*
 *.key
 *.mobileprovision
 /.tmp/
-eas.json
 .dccache
 eslint-results.sarif
 
