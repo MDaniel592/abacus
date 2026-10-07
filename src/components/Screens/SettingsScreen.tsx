@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CommonActions } from '@react-navigation/native';
 
 import translate from '../../i18n/locale';
-import { useThemeColors } from '../../lib/common';
+import { getContrastTextColor, useThemeColors } from '../../lib/common';
 import { RootDispatch, RootState } from '../../store';
 import { ScreenType } from '../../types/screen';
 import {
@@ -127,30 +127,58 @@ export default function SettingsScreen({ navigation }: ScreenType) {
 
   return (
     <AScrollView>
-      <AText fontSize={16} bold py={8}>{translate('configuration_appearance')}</AText>
-      <AStack row style={{ marginBottom: 12 }}>
-        {[{ value: 'light', label: 'configuration_light' }, { value: 'dark', label: 'configuration_dark' }, { value: null, label: 'configuration_system' }].map((choice) => (
-          <APressable
-            key={choice.label}
-            onPress={() => dispatch.configuration.setPreferredColorScheme(choice.value as 'light' | 'dark' | null)}
-            style={{
-              flex: 1, paddingVertical: 9, backgroundColor: (preferredScheme || null) === choice.value ? selectedBrandStyle : colors.tileBackgroundColor, borderRadius: 8, marginHorizontal: 2,
-            }}
-          >
-            <AText textAlign="center" fontSize={12} color={(preferredScheme || null) === choice.value ? 'white' : colors.text}>{translate(choice.label)}</AText>
-          </APressable>
-        ))}
-      </AStack>
-      <AStack
-        row
-        justifyContent="space-between"
+      <AText py={8} px={10} fontSize={16} bold>
+        {translate('configuration_appearance')}
+      </AText>
+      <AView
         style={{
-          padding: 12, backgroundColor: colors.tileBackgroundColor, borderRadius: 8, marginBottom: 12,
+          borderTopWidth: 0.5,
+          borderBottomWidth: 0.5,
+          borderColor: colors.listBorderColor,
+          backgroundColor: colors.tileBackgroundColor,
         }}
       >
-        <AText fontSize={14}>{translate('configuration_private_mode')}</AText>
-        <Switch accessibilityLabel={translate('configuration_private_mode')} thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} value={hideBalance} onValueChange={(value) => { dispatch.configuration.setHideBalance(value); }} />
-      </AStack>
+        <AStack
+          row
+          style={{
+            height: 42,
+            marginLeft: 8,
+            marginRight: 8,
+            borderBottomWidth: 0.5,
+            borderColor: colors.listBorderColor,
+          }}
+        >
+          {[{ value: 'light', label: 'configuration_light' }, { value: 'dark', label: 'configuration_dark' }, { value: null, label: 'configuration_system' }].map((choice) => (
+            <APressable
+              key={choice.label}
+              onPress={() => dispatch.configuration.setPreferredColorScheme(choice.value as 'light' | 'dark' | null)}
+              style={{
+                flex: 1,
+                height: 30,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: 8,
+                marginHorizontal: 2,
+                backgroundColor: (preferredScheme || null) === choice.value ? selectedBrandStyle : colors.backgroundColor,
+              }}
+            >
+              <AText textAlign="center" fontSize={13} color={(preferredScheme || null) === choice.value ? getContrastTextColor(selectedBrandStyle) : colors.text}>{translate(choice.label)}</AText>
+            </APressable>
+          ))}
+        </AStack>
+        <AStack
+          row
+          justifyContent="space-between"
+          style={{
+            height: 42,
+            marginLeft: 10,
+            marginRight: 10,
+          }}
+        >
+          <AText fontSize={14}>{translate('configuration_private_mode')}</AText>
+          <Switch accessibilityLabel={translate('configuration_private_mode')} thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} value={hideBalance} onValueChange={(value) => { dispatch.configuration.setHideBalance(value); }} />
+        </AStack>
+      </AView>
       <AText py={8} px={10} fontSize={16} bold>
         {translate('configuration_security')}
       </AText>

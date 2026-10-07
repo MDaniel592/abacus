@@ -78,6 +78,66 @@ export const useThemeColors = () => {
   };
 };
 
+const hexToRgb = (hexColor: string): number[] | null => {
+  const hex = (hexColor || '').replace('#', '');
+  if (!/^[0-9a-f]{6}$/i.test(hex)) {
+    return null;
+  }
+  return [0, 2, 4].map((i) => parseInt(hex.substring(i, i + 2), 16));
+};
+
+const relativeLuminance = ([r, g, b]: number[]): number => {
+  const [lr, lg, lb] = [r, g, b].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
+};
+
+const contrastRatio = (a: number[], b: number[]): number => {
+  const [high, low] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+  return (high + 0.05) / (low + 0.05);
+};
+
+// Text color to draw on top of the given hex color: white by default,
+// black when white would fall below 3:1 (light accents such as yellow or mint).
+export const getContrastTextColor = (hexColor: string): 'black' | 'white' => {
+  const rgb = hexToRgb(hexColor);
+  if (!rgb) {
+    return 'white';
+  }
+  return contrastRatio(rgb, [255, 255, 255]) >= 3 ? 'white' : 'black';
+};
+
+// Accent color usable as text/icon on the given background: the accent itself when it
+// already reaches 4.5:1, otherwise mixed towards white (dark bg) or black (light bg) until it does.
+export const getReadableAccent = (accent: string, background: string): string => {
+  const fg = hexToRgb(accent);
+  const bg = hexToRgb(background);
+  if (!fg || !bg) {
+    return accent;
+  }
+  const target = relativeLuminance(bg) < 0.5 ? 255 : 0;
+  for (let step = 0; step <= 10; step += 1) {
+    const mixed = fg.map((c) => Math.round(c + (target - c) * (step / 10)));
+    if (contrastRatio(mixed, bg) >= 4.5) {
+      return `#${mixed.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+    }
+  }
+  return accent;
+};
+
+export const useBrandStyle = () => {
+  const { colors: themeColors } = useThemeColors();
+  const brandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || themeColors.brandStyle);
+
+  return {
+    brandStyle,
+    brandStyleText: getReadableAccent(brandStyle, themeColors.backgroundColor),
+    brandStyleContrast: getContrastTextColor(brandStyle),
+  };
+};
+
 export const generateRangeTitle = (range: number, start: string, end: string): string => {
   let title = '';
 

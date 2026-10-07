@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 
 import { useSelector } from 'react-redux';
-import { isValidHttpUrl, useThemeColors } from '../../lib/common';
+import { getContrastTextColor, isValidHttpUrl, useThemeColors } from '../../lib/common';
 import translate from '../../i18n/locale';
 import { RootState } from '../../store';
 import {
@@ -42,7 +42,8 @@ export default function OauthForm({
   const loading = useSelector((state: RootState) => state.loading.effects.firefly.getNewAccessToken?.loading);
   const [isOauth, setIsAuth] = useState<boolean>(true);
   const toggleIsOauth = () => setIsAuth((value) => !value);
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
+  const brandTextColor = getContrastTextColor(selectedBrandStyle);
   const isMinimumRequirement = () => {
     if (isOauth && config.oauthClientId) {
       return true;
@@ -145,8 +146,8 @@ export default function OauthForm({
                 }}
                 onPress={copyToClipboard}
               >
-                <Ionicons name="copy" size={12} color="white" style={{ margin: 5 }} />
-                <AText fontSize={13} numberOfLines={1} color="white" bold>abacusfiiiapp://redirect</AText>
+                <Ionicons name="copy" size={12} color={brandTextColor} style={{ margin: 5 }} />
+                <AText fontSize={13} numberOfLines={1} color={brandTextColor} bold>abacusfiiiapp://redirect</AText>
               </APressable>
             </AStackFlex>
             <AFormView mx={0}>
@@ -244,8 +245,8 @@ export default function OauthForm({
               disabledTint
             >
               <AStackFlex row>
-                <Ionicons name="log-in-outline" size={20} color="white" style={{ margin: 5 }} />
-                <AText fontSize={15} color="white">{translate('auth_form_submit_button_initial')}</AText>
+                <Ionicons name="log-in-outline" size={20} color={brandTextColor} style={{ margin: 5 }} />
+                <AText fontSize={15} color={brandTextColor}>{translate('auth_form_submit_button_initial')}</AText>
               </AStackFlex>
             </AButton>
           </AView>

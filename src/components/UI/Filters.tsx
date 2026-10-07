@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AStackFlex, AText } from './ALibrary';
 import { RootDispatch, RootState } from '../../store';
 import translate from '../../i18n/locale';
-import { useThemeColors } from '../../lib/common';
+import { getContrastTextColor, useThemeColors } from '../../lib/common';
 
 export default function Filters() {
   const { colors } = useThemeColors();
@@ -76,7 +76,7 @@ export default function Filters() {
               margin: 2,
             }}
             >
-              <AText fontSize={13} numberOfLines={1} color="white" bold>
+              <AText fontSize={13} numberOfLines={1} color={currentCode === currency.attributes.code ? getContrastTextColor(selectedBrandStyle) : 'white'} bold>
                 {`${currency?.attributes.code} ${currency?.attributes.symbol}`}
               </AText>
             </View>

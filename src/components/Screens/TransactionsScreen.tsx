@@ -66,7 +66,7 @@ function ListFooterComponent({ onLoadMore, initLoading }) {
       {(!initLoading && !loading && (page < totalPages)) && (
         <AButton style={{ height: 40 }} mx={30} onPress={onLoadMore}>
           <AStackFlex row>
-            <Ionicons name="cloud-download" size={15} color="white" style={{ margin: 5 }} />
+            <Ionicons name="cloud-download" size={15} color={colors.text} style={{ margin: 5 }} />
             <AText fontSize={15}>{translate('load_more')}</AText>
           </AStackFlex>
         </AButton>
@@ -108,26 +108,26 @@ function RenderItem({ item }) {
 
   const colorItemTypes = {
     withdrawal: {
-      bg: colors.brandNeutralLight,
-      color: colors.red,
+      bg: colors.brandDangerLight,
+      color: colors.brandDanger,
       icon: 'arrow-down',
       prefix: '-',
     },
     deposit: {
       bg: colors.brandSuccessLight,
-      color: colors.green,
+      color: colors.brandSuccess,
       icon: 'arrow-up',
       prefix: '+',
     },
     transfer: {
       bg: colors.brandInfoLight,
-      color: colors.blue,
+      color: colors.brandInfo,
       icon: 'arrow-left-right',
       prefix: '',
     },
     'opening balance': {
       bg: colors.brandNeutralLight,
-      color: colors.red,
+      color: colors.brandNeutral,
       icon: 'arrow-left-right',
       prefix: '',
     },

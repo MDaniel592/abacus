@@ -26,7 +26,7 @@ import ErrorBoundary from '../UI/ErrorBoundary';
 
 export default function CredentialsScreen({ navigation, route }: ScreenType) {
   const { colors } = useThemeColors();
-  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyleOrange);
+  const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
   const { name: routeName } = useRoute();
   const useBiometricAuth = useSelector((state: RootState) => state.configuration.useBiometricAuth);
   const [credentials, setCredentials] = useState<TCredential[]>([]);
@@ -150,7 +150,7 @@ export default function CredentialsScreen({ navigation, route }: ScreenType) {
       >
         <AButton style={{ height: 50 }} mx={40} onPress={() => bioAuthCheck(credentials)}>
           <AStackFlex row>
-            <Ionicons name="lock-open" size={15} color="white" style={{ margin: 5 }} />
+            <Ionicons name="lock-open" size={15} color={colors.text} style={{ margin: 5 }} />
             <AText fontSize={15}>{translate('auth_form_biometrics_lock')}</AText>
           </AStackFlex>
         </AButton>

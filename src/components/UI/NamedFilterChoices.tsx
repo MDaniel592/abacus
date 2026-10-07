@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { RootDispatch } from '../../store';
 import translate from '../../i18n/locale';
-import { useThemeColors } from '../../lib/common';
+import { useBrandStyle, useThemeColors } from '../../lib/common';
 import { NO_CATEGORY } from '../../lib/transaction-search';
 import { AInput, AText } from './ALibrary';
 import AButton from './ALibrary/AButton';
@@ -17,6 +17,7 @@ export default function NamedFilterChoices({
   navigation, filterKind, selected, selectFilter,
 }) {
   const { colors } = useThemeColors();
+  const { brandStyleText } = useBrandStyle();
   const dispatch = useDispatch<RootDispatch>();
   const [options, setOptions] = useState<NamedOption[]>([]);
   const [query, setQuery] = useState('');
@@ -82,7 +83,7 @@ export default function NamedFilterChoices({
         </AButton>
       </View>
       <AInput height={46} value={query} onChangeText={setQuery} placeholder={translate('transaction_filter_search')} />
-      {loading && <ActivityIndicator style={{ margin: 24 }} color={colors.brandStyle} />}
+      {loading && <ActivityIndicator style={{ margin: 24 }} color={brandStyleText} />}
       {failed && (
         <View style={{ paddingVertical: 20 }}>
           <AText fontSize={14}>{translate('transaction_filter_load_error')}</AText>
@@ -103,7 +104,7 @@ export default function NamedFilterChoices({
             }}
           >
             <AText fontSize={15} style={{ flex: 1 }} bold={selected === option.value}>{option.label}</AText>
-            {selected === option.value && <Ionicons name="checkmark" size={20} color={colors.brandStyle} />}
+            {selected === option.value && <Ionicons name="checkmark" size={20} color={brandStyleText} />}
           </Pressable>
         ))}
         {!loading && !failed && choices.length === 0 && <AText fontSize={14} py={20}>{translate('transaction_filter_no_results')}</AText>}

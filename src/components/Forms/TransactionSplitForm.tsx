@@ -80,6 +80,14 @@ export default function TransactionSplitForm({
     'opening balance': colors.blue,
   };
 
+  // Readable on the form background; colorItemTypes is used as a fill behind white text.
+  const amountColorTypes = {
+    withdrawal: colors.brandDanger,
+    deposit: colors.brandSuccess,
+    transfer: colors.brandInfo,
+    'opening balance': colors.brandInfo,
+  };
+
   const deleteBtn = (fields: string[]) => (
     <AIconButton
       icon={<AntDesign name="close-circle" size={19} color={colors.greyLight} />}
@@ -175,7 +183,7 @@ export default function TransactionSplitForm({
           value={formData.amount}
           fontSize={27}
           textAlign="center"
-          color={colorItemTypes[formData.type]}
+          color={amountColorTypes[formData.type]}
           onChangeText={(value) => setTransaction({
             ...formData,
             amount: value,

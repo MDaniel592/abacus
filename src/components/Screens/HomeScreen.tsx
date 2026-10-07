@@ -26,7 +26,7 @@ import moment from 'moment';
 import usePrivateNumberFormat from '../../lib/use-private-number-format';
 import { RootDispatch, RootState } from '../../store';
 import translate from '../../i18n/locale';
-import { useThemeColors } from '../../lib/common';
+import { useBrandStyle, useThemeColors } from '../../lib/common';
 
 import {
   AScrollView,
@@ -285,13 +285,13 @@ function InsightBudgets() {
                 <AStack
                   px={6}
                   py={2}
-                  backgroundColor={-budget.differenceFloat > budget.limit ? colors.brandNeutralLight : colors.brandSuccessLight}
+                  backgroundColor={-budget.differenceFloat > budget.limit ? colors.brandDangerLight : colors.brandSuccessLight}
                   style={{ borderRadius: 5 }}
                 >
                   <AText
                     fontSize={15}
                     numberOfLines={1}
-                    color={-budget.differenceFloat > budget.limit ? colors.brandNeutral : colors.brandSuccess}
+                    color={-budget.differenceFloat > budget.limit ? colors.brandDanger : colors.brandSuccess}
                     style={{ textAlign: 'center' }}
                     bold
                   >
@@ -511,13 +511,13 @@ function NetWorth() {
     <View testID="home_screen_net_worth" style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 9 }}>
       <View>
         <LinearGradient
-          colors={colorScheme === 'dark' ? ['#523B88', '#7054AB'] : ['#7052C4', '#946DDD']}
+          colors={colorScheme === 'dark' ? ['#523B88', '#7054AB'] : ['#6446B8', '#7B58CC']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ borderRadius: 14, padding: 12 }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <AText fontSize={12} color="#F1E9FF">{translate('home_net_worth')}</AText>
+            <AText fontSize={12} color="white">{translate('home_net_worth')}</AText>
           </View>
           <ASkeleton loading={loading}>
             <AText fontSize={27} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} py={5}>
@@ -559,6 +559,7 @@ export function CategoriesScreen() {
 
 export default function HomeScreen() {
   const { colors } = useThemeColors();
+  const { brandStyle, brandStyleContrast } = useBrandStyle();
   const start = useSelector((state: RootState) => state.firefly.rangeDetails.start);
   const end = useSelector((state: RootState) => state.firefly.rangeDetails.end);
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
@@ -597,10 +598,10 @@ export default function HomeScreen() {
                 accessibilityState={{ selected: selectedPage === index }}
                 onPress={() => { setSelectedPage(index); viewPagerRef.current?.setPage(index); }}
                 style={{
-                  backgroundColor: selectedPage === index ? colors.brandStyle : colors.tileBackgroundColor, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 7,
+                  backgroundColor: selectedPage === index ? brandStyle : colors.tileBackgroundColor, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 7,
                 }}
               >
-                <AText fontSize={11} color={selectedPage === index ? 'white' : colors.greyLight} bold>{translate(label)}</AText>
+                <AText fontSize={11} color={selectedPage === index ? brandStyleContrast : colors.greyLight} bold>{translate(label)}</AText>
               </Pressable>
             ))}
           </ScrollView>

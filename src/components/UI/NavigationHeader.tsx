@@ -10,11 +10,12 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AText } from './ALibrary';
 import { RootDispatch, RootState } from '../../store';
-import { useThemeColors } from '../../lib/common';
+import { useBrandStyle, useThemeColors } from '../../lib/common';
 import translate from '../../i18n/locale';
 
 export default function NavigationHeader({ navigation }) {
   const { colors } = useThemeColors();
+  const { brandStyle, brandStyleText, brandStyleContrast } = useBrandStyle();
   const insets = useSafeAreaInsets();
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
   const title = useSelector((state: RootState) => state.firefly.rangeDetails.title);
@@ -79,10 +80,10 @@ export default function NavigationHeader({ navigation }) {
                   key={choice.size}
                   onPress={() => setPickerRange(choice.size)}
                   style={{
-                    flex: 1, paddingVertical: 9, borderRadius: 7, backgroundColor: pickerRange === choice.size ? colors.brandStyle : colors.backgroundColor,
+                    flex: 1, paddingVertical: 9, borderRadius: 7, backgroundColor: pickerRange === choice.size ? brandStyle : colors.backgroundColor,
                   }}
                 >
-                  <AText fontSize={10} textAlign="center" color={pickerRange === choice.size ? 'white' : colors.text}>{translate(choice.label)}</AText>
+                  <AText fontSize={10} textAlign="center" color={pickerRange === choice.size ? brandStyleContrast : colors.text}>{translate(choice.label)}</AText>
                 </Pressable>
               ))}
             </View>
@@ -97,7 +98,12 @@ export default function NavigationHeader({ navigation }) {
                   }}
                   style={{ width: pickerRange === 1 ? '33.333%' : pickerRange === 12 ? '100%' : '50%', paddingVertical: 14 }}
                 >
-                  <AText textAlign="center" fontSize={14} color={moment(start).month() === month && moment(start).format('YYYY') === pickerYear ? colors.brandStyle : colors.text}>
+                  <AText
+                    textAlign="center"
+                    fontSize={14}
+                    bold={moment(start).month() === month && moment(start).format('YYYY') === pickerYear}
+                    color={moment(start).month() === month && moment(start).format('YYYY') === pickerYear ? brandStyleText : colors.text}
+                  >
                     {pickerRange === 12 ? pickerYear : pickerRange === 3 ? `T${month / 3 + 1}` : pickerRange === 6 ? `S${month / 6 + 1}` : moment().month(month).locale('es').format('MMM')
                       .replace('.', '')}
                   </AText>
@@ -112,7 +118,7 @@ export default function NavigationHeader({ navigation }) {
         height: 44, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
       }}
       >
-        <AText fontSize={20} bold color={colors.brandStyle}>abacus.</AText>
+        <AText fontSize={20} bold color={brandStyleText}>abacus.</AText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <Pressable accessibilityRole="button" accessibilityLabel={translate('home_previous_period')} onPress={() => changePeriod(-1)} style={{ padding: 8 }}>
             <Ionicons name="chevron-back" size={18} color={colors.greyLight} />

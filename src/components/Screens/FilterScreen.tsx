@@ -6,7 +6,7 @@ import {
 
 import { AStackFlex, AText, AView } from '../UI/ALibrary';
 import { RootState } from '../../store';
-import { useThemeColors } from '../../lib/common';
+import { getContrastTextColor, useThemeColors } from '../../lib/common';
 import { ScreenType } from '../../types/screen';
 import { types } from '../../models/transactions';
 import translate from '../../i18n/locale';
@@ -115,7 +115,11 @@ export default function FilterScreen({ navigation, route }: ScreenType) {
                 }}
                 >
                   <Text
-                    style={{ fontFamily: 'Montserrat-Bold', color: 'white', maxWidth: 200 }}
+                    style={{
+                      fontFamily: 'Montserrat-Bold',
+                      color: selectedAccountIds?.includes(parseInt(account.id, 10)) ? getContrastTextColor(selectedBrandStyle) : 'white',
+                      maxWidth: 200,
+                    }}
                     numberOfLines={1}
                   >
                     {account.attributes.name}

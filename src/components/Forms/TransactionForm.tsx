@@ -22,12 +22,13 @@ import Loading from '../UI/Loading';
 import { initialSplit } from '../../models/transactions';
 import { AStackFlex, AText, AView } from '../UI/ALibrary';
 import AButton from '../UI/ALibrary/AButton';
-import { useThemeColors } from '../../lib/common';
+import { useBrandStyle, useThemeColors } from '../../lib/common';
 
 const EMPTY_SPLITS = [];
 
 function MultipleTransactionSplitForm({ isNew, splits, title }) {
   const { colors } = useThemeColors();
+  const { brandStyle } = useBrandStyle();
   const displayForeignCurrency = useSelector((state: RootState) => state.configuration.displayForeignCurrency);
   const [splitNumber, setSplitNumber] = useState<string[]>([]);
   const dispatch = useDispatch<RootDispatch>();
@@ -92,7 +93,7 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
         {(splitNumber.length > 1 || title) && <GroupTitle title={title || ''} />}
         <AStackFlex row py={10} alignItems="center" justifyContent="space-between">
           <AText color={colors.greyLight} fontSize={13} bold>{translate('transaction_form_foreign_currency_label')}</AText>
-          <Switch thumbColor="white" trackColor={{ false: '#767577', true: colors.brandStyle }} onValueChange={onSwitch} value={displayForeignCurrency} />
+          <Switch thumbColor="white" trackColor={{ false: '#767577', true: brandStyle }} onValueChange={onSwitch} value={displayForeignCurrency} />
         </AStackFlex>
       </>
       )}
@@ -101,13 +102,14 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
 }
 
 function TransactionFormButtons({ handleSubmit }) {
+  const { brandStyleContrast } = useBrandStyle();
   const loading = useSelector((state: RootState) => state.loading.effects.transactions.upsertTransaction?.loading);
 
   return (
     <AButton type="primary" loading={loading} disabled={loading} style={{ height: 44, marginBottom: 0 }} onPress={handleSubmit}>
       <AStackFlex row>
-        <Ionicons name="cloud-upload-sharp" size={20} color="white" style={{ margin: 5 }} />
-        <AText color="white" fontSize={13}>{translate('transaction_form_submit_button')}</AText>
+        <Ionicons name="cloud-upload-sharp" size={20} color={brandStyleContrast} style={{ margin: 5 }} />
+        <AText color={brandStyleContrast} fontSize={13}>{translate('transaction_form_submit_button')}</AText>
       </AStackFlex>
     </AButton>
   );

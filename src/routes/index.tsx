@@ -23,7 +23,7 @@ import {
 } from 'expo-quick-actions/hooks';
 import { RootState } from '../store';
 import translate from '../i18n/locale';
-import { useThemeColors } from '../lib/common';
+import { getContrastTextColor, useThemeColors } from '../lib/common';
 
 // Screens
 import HomeScreen, { CategoriesScreen } from '../components/Screens/HomeScreen';
@@ -67,7 +67,7 @@ function TabBarPrimaryButton() {
         style={{
           width: 44, height: 44, borderRadius: 14,
         }}
-        icon={<AntDesign name="plus" color="white" size={22} />}
+        icon={<AntDesign name="plus" color={getContrastTextColor(selectedBrandStyle)} size={22} />}
         onPress={() => navigation.dispatch(
           CommonActions.navigate({
             name: 'TransactionCreateScreen',
