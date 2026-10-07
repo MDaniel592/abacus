@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useMemo,
-  useLayoutEffect,
   useEffect,
   useState,
   useRef,
@@ -28,15 +27,15 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 
-import { SearchBarCommands } from 'react-native-screens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import usePrivateNumberFormat from '../../lib/use-private-number-format';
 import { TransactionSplitType, TransactionType } from '../../models/transactions';
 import { RootDispatch, RootState } from '../../store';
 import translate from '../../i18n/locale';
-import { D_WIDTH, useThemeColors } from '../../lib/common';
+import { useThemeColors } from '../../lib/common';
 import { ScreenType } from '../../types/screen';
 import {
-  APressable, AStackFlex, AText, AView,
+  AInput, APressable, AStackFlex, AText, AView,
 } from '../UI/ALibrary';
 import AFilterButton from '../UI/ALibrary/AFilterButton';
 import AButton from '../UI/ALibrary/AButton';
@@ -143,6 +142,15 @@ function RenderItem({ item }) {
     return colorItemTypes[type];
   };
 
+  const split = item.attributes.transactions[0];
+  const typeAttributes = getTransactionTypeAttributes(split.type);
+  const meta = [
+    split.type === 'withdrawal' ? split.sourceName : split.destinationName,
+    split.categoryName,
+    moment(split.date).format('HH:mm'),
+    ...split.tags.map((tag) => `#${tag}`),
+  ].filter(Boolean).join(' · ');
+
   return useMemo(() => (
     <APressable
       style={{
@@ -150,7 +158,7 @@ function RenderItem({ item }) {
         backgroundColor: colors.tileBackgroundColor,
         borderTopWidth: 0.5,
         borderColor: colors.listBorderColor,
-        paddingLeft: 10,
+        paddingHorizontal: 16,
       }}
       onPress={() => {
         goToEdit(item.id, {
@@ -166,62 +174,34 @@ function RenderItem({ item }) {
         });
       }}
     >
-      <AStackFlex justifyContent="space-between" alignItems="flex-start" row>
-        <AStackFlex justifyContent="flex-start" row>
-          <AView
-            style={{
-              backgroundColor: getTransactionTypeAttributes(item.attributes.transactions[0].type).bg,
-              borderRadius: 10,
-              marginRight: 8,
-              padding: 5,
-            }}
-          >
-            <MaterialCommunityIcons
-              name={getTransactionTypeAttributes(item.attributes.transactions[0].type).icon}
-              size={19}
-              color={getTransactionTypeAttributes(item.attributes.transactions[0].type).color}
-            />
-          </AView>
-          <AStackFlex alignItems="flex-start" py={5}>
-            <AText fontSize={12} maxWidth={D_WIDTH - 150} numberOfLines={1} bold>
-              {item.attributes.groupTitle}
-              {item.attributes.groupTitle?.length > 0 ? ': ' : ''}
-              {item.attributes.transactions[0].description}
-            </AText>
-
-            <AText fontSize={10} maxWidth={D_WIDTH - 150} numberOfLines={1}>
-              {item.attributes.transactions[0].type === 'withdrawal' ? item.attributes.transactions[0].sourceName : item.attributes.transactions[0].destinationName}
-              {item.attributes.transactions[0].categoryName ? ` · ${item.attributes.transactions[0].categoryName}` : ''}
-            </AText>
-            <AText fontSize={9} color={colors.greyLight} maxWidth={D_WIDTH - 150} numberOfLines={1}>
-              {moment(item.attributes.transactions[0].date).format('HH:mm')}
-              {item.attributes.transactions[0].tags.map((tag) => ` #${tag}`).join('')}
-            </AText>
-          </AStackFlex>
-        </AStackFlex>
-        <AView
-          style={{
-            borderRadius: 10,
-            backgroundColor: getTransactionTypeAttributes(item.attributes.transactions[0].type).bg,
-            margin: 6,
-            marginTop: 9,
-            padding: 3,
-          }}
-        >
-          <AText
-            fontSize={13}
-            color={getTransactionTypeAttributes(item.attributes.transactions[0].type).color}
-            bold
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.8}
-          >
-            {`${getTransactionTypeAttributes(item.attributes.transactions[0].type).prefix}${localNumberFormat(item.attributes.transactions[0].currencyCode, item.attributes.transactions.reduce((total, split) => total + parseFloat(split.amount), 0))}`}
-          </AText>
-        </AView>
-      </AStackFlex>
+      <AView
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 17,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: typeAttributes.bg,
+          marginRight: 12,
+        }}
+      >
+        <MaterialCommunityIcons name={typeAttributes.icon} size={18} color={typeAttributes.color} />
+      </AView>
+      <AView style={{ flex: 1, marginRight: 10 }}>
+        <AText fontSize={14} numberOfLines={1} bold>
+          {item.attributes.groupTitle}
+          {item.attributes.groupTitle?.length > 0 ? ': ' : ''}
+          {split.description}
+        </AText>
+        <AText fontSize={11} color={colors.greyLight} numberOfLines={1} style={{ marginTop: 2 }}>
+          {meta}
+        </AText>
+      </AView>
+      <AText fontSize={14} color={typeAttributes.color} bold numberOfLines={1}>
+        {`${typeAttributes.prefix}${localNumberFormat(split.currencyCode, item.attributes.transactions.reduce((total, s) => total + parseFloat(s.amount), 0))}`}
+      </AText>
     </APressable>
-  ), [item, colors]);
+  ), [item, colors, localNumberFormat]);
 }
 
 async function deleteAlert(transaction: TransactionType, rowMap, closeRow, deleteRow) {
@@ -298,6 +278,8 @@ function RenderHiddenItem({ handleOnPressCopy, handleOnPressDelete }) {
 export default function TransactionsScreen({ navigation, route }: ScreenType) {
   const { params } = route;
   const { colors } = useThemeColors();
+  const insets = useSafeAreaInsets();
+  const localNumberFormat = usePrivateNumberFormat();
   const [loading, setLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [search, setSearch] = useState('');
@@ -322,7 +304,6 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     },
   } = useDispatch<RootDispatch>();
 
-  const searchBarRef = React.useRef<SearchBarCommands>(null);
   const onLoad = useCallback(async () => {
     loadGeneration.current += 1;
     const generation = loadGeneration.current;
@@ -364,29 +345,10 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     return () => clearTimeout(timeout);
   }, [searchDraft]);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerSearchBarOptions: {
-        ref: searchBarRef,
-        autoCapitalize: 'none',
-        placeholder: translate('transaction_search_placeholder'),
-        headerIconColor: colors.text,
-        textColor: colors.text,
-        hintTextColor: colors.text,
-        onChangeText: (event) => setSearchDraft(event.nativeEvent.text),
-        onBlur: () => setSearch(searchDraft),
-        onSearchButtonPress: () => setSearch(searchDraft),
-        disableBackButtonOverride: true,
-        shouldShowHintSearchIcon: false,
-      },
-    });
-  }, [navigation, colors.text, searchDraft]);
-
   useEffect(() => {
     if (params?.transactionSearch !== undefined) {
       setSearch(params.transactionSearch);
       setSearchDraft(params.transactionSearch);
-      searchBarRef.current?.setText(params.transactionSearch);
       navigation.setParams({ transactionSearch: undefined });
     }
     if (params?.category !== undefined) {
@@ -395,7 +357,6 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
       setAccount('');
       setSearch('');
       setSearchDraft('');
-      searchBarRef.current?.clearText();
       navigation.setParams({ category: undefined });
     }
     if (params?.transactionType !== undefined) {
@@ -458,7 +419,6 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     setCategory('');
     setTag('');
     setSearchDraft('');
-    searchBarRef.current?.clearText();
     setStartDate(new Date(`${defaultStart}T12:00:00`));
     setEndDate(new Date(`${defaultEnd}T12:00:00`));
   };
@@ -479,134 +439,179 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
         }
       });
 
-      return Array.from(byDay.entries()).map(([title, data]) => ({ title, data }));
+      return Array.from(byDay.entries()).map(([title, data]) => {
+        const currencies = new Set(data.map((t) => t.attributes.transactions[0].currencyCode));
+        const total = data.reduce((sum, t) => {
+          const amount = t.attributes.transactions.reduce((acc, split) => acc + parseFloat(split.amount), 0);
+          const { type: splitType } = t.attributes.transactions[0];
+          if (splitType === 'withdrawal') return sum - amount;
+          if (splitType === 'deposit') return sum + amount;
+          return sum;
+        }, 0);
+        return {
+          title,
+          data,
+          total,
+          currencyCode: currencies.size === 1 ? [...currencies][0] : null,
+        };
+      });
     },
     [transactions],
   );
 
+  const hasFilters = type !== '' || currentCode !== '' || account !== '' || category !== '' || tag !== '' || search !== '';
+
   return (
-    <SwipeListView
-      useSectionList
-      nestedScrollEnabled={false}
-      contentInsetAdjustmentBehavior="automatic"
-      refreshControl={(
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={onLoad}
-        />
-      )}
-      ListHeaderComponent={(
-        <AView>
-          <AView
-            style={{
-              backgroundColor: colors.backgroundColor,
-              paddingTop: 12,
-              paddingBottom: 12,
-              borderBottomWidth: 0.5,
-              borderColor: colors.listBorderColor,
-            }}
-          >
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingHorizontal: 12, alignItems: 'center' }}
-            >
-              {(type !== '' || currentCode !== '' || account !== '' || category !== '' || tag !== '' || search !== '') && (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel={translate('transaction_form_reset_button')}
-                hitSlop={{ top: 6, bottom: 6 }}
-                onPress={resetFilters}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  height: 36,
-                  paddingHorizontal: 12,
-                  marginRight: 8,
-                  borderRadius: 18,
-                  backgroundColor: colors.brandDangerLight,
-                }}
-              >
-                <Ionicons name="close" size={16} color={colors.brandDanger} style={{ marginRight: 4 }} />
-                <AText fontSize={13} color={colors.brandDanger} bold>{translate('transaction_form_reset_button')}</AText>
-              </TouchableOpacity>
-              )}
-              <ADateFilterButton currentDate={start} selectDate={(date: Date) => { setStartDate(date); setEndDate(moment(date).endOf('month').toDate()); }} />
-              <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
-              <AFilterButton filterKind="category" filterType={translate('transaction_form_category_label')} selected={category} selectFilter={setCategory} navigation={navigation} />
-              <AFilterButton filterKind="tag" filterType={translate('transaction_form_tags_label')} selected={tag} selectFilter={setTag} navigation={navigation} />
-              <AFilterButton filterType={translate('currency')} selected={currentCode} selectFilter={(selected) => setCurrentCode(selected)} navigation={navigation} />
-              <AFilterButton filterType={translate('home_accounts')} selected={account} selectFilter={(selected) => setAccount(selected)} navigation={navigation} />
-            </ScrollView>
-          </AView>
-          {loadError && (
-          <AView style={{ padding: 16 }}>
-            <AText fontSize={13}>{translate('transaction_filter_load_error')}</AText>
-            <AButton style={{ height: 44, marginTop: 12 }} onPress={onLoad}>
-              <AText fontSize={14}>{translate('transaction_filter_retry')}</AText>
-            </AButton>
-          </AView>
-          )}
+    <AView style={{ flex: 1, backgroundColor: colors.backgroundColor }}>
+      <AView
+        style={{
+          paddingTop: insets.top,
+          backgroundColor: colors.backgroundColor,
+          borderBottomWidth: 0.5,
+          borderColor: colors.listBorderColor,
+        }}
+      >
+        <AView style={{ height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
+          <AText fontSize={20} bold>{translate('navigation_transactions_tab')}</AText>
         </AView>
-      )}
-      ListEmptyComponent={!loading && !loadError ? <AText py={30} fontSize={14} textAlign="center">{translate('transaction_filter_no_results')}</AText> : null}
-      initialNumToRender={15}
-      keyExtractor={(item: TransactionType) => item.id}
-      sections={!loading ? transactionSections : []}
-      showsVerticalScrollIndicator
-      renderSectionHeader={({ section }) => {
-        const label = moment(section.title, 'YYYY-MM-DD', true).isValid()
-          ? moment(section.title, 'YYYY-MM-DD').format('LL')
-          : section.title;
-        return (
-          <AView
+        <AView style={{ paddingHorizontal: 16 }}>
+          <AInput
+            height={38}
+            returnKeyType="search"
+            placeholder={translate('transaction_search_placeholder')}
+            value={searchDraft}
+            onChangeText={setSearchDraft}
+            onSubmitEditing={() => setSearch(searchDraft)}
+            style={{ backgroundColor: colors.tileBackgroundColor }}
+            InputLeftElement={<Ionicons name="search" size={17} color={colors.greyLight} style={{ marginHorizontal: 10 }} />}
+            InputRightElement={searchDraft !== '' ? (
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={translate('transaction_form_reset_button')} hitSlop={8} onPress={() => { setSearchDraft(''); setSearch(''); }} style={{ paddingHorizontal: 10 }}>
+                <Ionicons name="close-circle" size={17} color={colors.greyLight} />
+              </TouchableOpacity>
+            ) : null}
+          />
+        </AView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center' }}
+        >
+          {hasFilters && (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={translate('transaction_form_reset_button')}
+            hitSlop={{ top: 6, bottom: 6 }}
+            onPress={resetFilters}
             style={{
-              backgroundColor: colors.tileBackgroundColor,
-              paddingHorizontal: 10,
-              paddingTop: 12,
-              paddingBottom: 6,
-              borderTopWidth: 0.5,
-              borderColor: colors.listBorderColor,
+              flexDirection: 'row',
+              alignItems: 'center',
+              height: 36,
+              paddingHorizontal: 12,
+              marginRight: 8,
+              borderRadius: 18,
+              backgroundColor: colors.brandDangerLight,
             }}
           >
-            <AText bold>{label}</AText>
-          </AView>
-        );
-      }}
-      renderItem={({ item }) => <RenderItem item={item} />}
-      renderHiddenItem={(data, rowMap) => (
-        <RenderHiddenItem
-          handleOnPressCopy={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch();
-            goToDuplicate({
-              splits: resetTransactionsDates(data.item.attributes.transactions),
-              groupTitle: data.item.attributes.groupTitle || '',
-            });
-          }}
-          handleOnPressDelete={() => deleteAlert(data.item, rowMap, closeRow, deleteRow)}
-        />
+            <Ionicons name="close" size={16} color={colors.brandDanger} style={{ marginRight: 4 }} />
+            <AText fontSize={13} color={colors.brandDanger} bold>{translate('transaction_form_reset_button')}</AText>
+          </TouchableOpacity>
+          )}
+          <ADateFilterButton currentDate={start} selectDate={(date: Date) => { setStartDate(date); setEndDate(moment(date).endOf('month').toDate()); }} />
+          <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
+          <AFilterButton filterKind="category" filterType={translate('transaction_form_category_label')} selected={category} selectFilter={setCategory} navigation={navigation} />
+          <AFilterButton filterKind="tag" filterType={translate('transaction_form_tags_label')} selected={tag} selectFilter={setTag} navigation={navigation} />
+          <AFilterButton filterType={translate('currency')} selected={currentCode} selectFilter={(selected) => setCurrentCode(selected)} navigation={navigation} />
+          <AFilterButton filterType={translate('home_accounts')} selected={account} selectFilter={(selected) => setAccount(selected)} navigation={navigation} />
+        </ScrollView>
+      </AView>
+      {loadError && (
+      <AView style={{ padding: 16 }}>
+        <AText fontSize={13}>{translate('transaction_filter_load_error')}</AText>
+        <AButton style={{ height: 44, marginTop: 12 }} onPress={onLoad}>
+          <AText fontSize={14}>{translate('transaction_filter_retry')}</AText>
+        </AButton>
+      </AView>
       )}
-      rightOpenValue={-90}
-      stopRightSwipe={-190}
-      rightActivationValue={-170}
-      onRightActionStatusChange={({
-        key,
-        isActivated,
-      }) => (isActivated ? deleteAlert(transactions.find((t) => t.id === key), [], closeRow, deleteRow) : null)}
-      leftOpenValue={90}
-      stopLeftSwipe={190}
-      leftActivationValue={170}
-      onLeftActionStatusChange={({
-        key,
-        isActivated,
-      }) => (isActivated ? goToDuplicate({
-        splits: resetTransactionsDates(transactions.find((t) => t.id === key).attributes.transactions),
-        groupTitle: transactions.find((t) => t.id === key).attributes.groupTitle || '',
-      }) : null)}
-      contentContainerStyle={{ paddingBottom: 100 }}
-      getItemLayout={(_, index: number) => ({ length: ITEM_HEIGHT + 1, offset: (ITEM_HEIGHT + 1) * index, index })}
-      ListFooterComponent={ListFooterComponent({ onLoadMore, initLoading: loading })}
-    />
+      <SwipeListView
+        useSectionList
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={false}
+        refreshControl={(
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={onLoad}
+          />
+      )}
+        ListEmptyComponent={!loading && !loadError ? <AText py={30} fontSize={14} textAlign="center">{translate('transaction_filter_no_results')}</AText> : null}
+        initialNumToRender={15}
+        keyExtractor={(item: TransactionType) => item.id}
+        sections={!loading ? transactionSections : []}
+        showsVerticalScrollIndicator
+        renderSectionHeader={({ section }) => {
+          const day = moment(section.title, 'YYYY-MM-DD', true);
+          let label = section.title;
+          if (day.isValid()) {
+            if (day.isSame(moment(), 'day')) label = translate('today');
+            else if (day.isSame(moment().subtract(1, 'day'), 'day')) label = translate('yesterday');
+            else label = day.format(day.isSame(moment(), 'year') ? 'dddd, D MMM' : 'dddd, D MMM YYYY');
+          }
+          return (
+            <AView
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: colors.backgroundColor,
+                paddingHorizontal: 16,
+                paddingTop: 14,
+                paddingBottom: 6,
+              }}
+            >
+              <AText fontSize={12} color={colors.greyLight} bold capitalize>{label}</AText>
+              {section.currencyCode && section.total !== 0 && (
+              <AText fontSize={12} color={colors.greyLight}>
+                {section.total > 0 ? '+' : ''}
+                {localNumberFormat(section.currencyCode, section.total)}
+              </AText>
+              )}
+            </AView>
+          );
+        }}
+        renderItem={({ item }) => <RenderItem item={item} />}
+        renderHiddenItem={(data, rowMap) => (
+          <RenderHiddenItem
+            handleOnPressCopy={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch();
+              goToDuplicate({
+                splits: resetTransactionsDates(data.item.attributes.transactions),
+                groupTitle: data.item.attributes.groupTitle || '',
+              });
+            }}
+            handleOnPressDelete={() => deleteAlert(data.item, rowMap, closeRow, deleteRow)}
+          />
+        )}
+        rightOpenValue={-90}
+        stopRightSwipe={-190}
+        rightActivationValue={-170}
+        onRightActionStatusChange={({
+          key,
+          isActivated,
+        }) => (isActivated ? deleteAlert(transactions.find((t) => t.id === key), [], closeRow, deleteRow) : null)}
+        leftOpenValue={90}
+        stopLeftSwipe={190}
+        leftActivationValue={170}
+        onLeftActionStatusChange={({
+          key,
+          isActivated,
+        }) => (isActivated ? goToDuplicate({
+          splits: resetTransactionsDates(transactions.find((t) => t.id === key).attributes.transactions),
+          groupTitle: transactions.find((t) => t.id === key).attributes.groupTitle || '',
+        }) : null)}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        ListFooterComponent={ListFooterComponent({ onLoadMore, initLoading: loading })}
+      />
+    </AView>
   );
 }

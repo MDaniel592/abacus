@@ -137,20 +137,7 @@ function TransactionsStack() {
         name="TransactionsScreen"
         component={TransactionsScreen}
         initialParams={{ forceRefresh: false }}
-        options={{
-          headerTitle: translate('navigation_transactions_tab'),
-          headerLargeTitle: true,
-          headerTransparent: Platform.select({ ios: true, android: false }),
-          headerStyle: Platform.select({ android: { backgroundColor: colors.tileBackgroundColor } }),
-          headerTintColor: colors.text,
-          headerShadowVisible: true,
-          headerTitleStyle: {
-            fontFamily: 'Montserrat-Bold',
-          },
-          headerLargeTitleStyle: {
-            fontFamily: 'Montserrat-Bold',
-          },
-        }}
+        options={{ headerShown: false }}
       />
       <TransactionStack.Screen
         name="TransactionDetailScreen"

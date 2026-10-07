@@ -89,6 +89,8 @@ export default {
   navigation_home_tab: 'Home',
   navigation_chart_tab: 'Chart',
   navigation_create_tab: 'Create',
+  today: 'Today',
+  yesterday: 'Yesterday',
   navigation_transactions_tab: 'Transactions',
   navigation_settings_tab: 'Settings',
   transaction_form_type_withdrawal: 'Withdrawal',

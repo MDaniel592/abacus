@@ -28,10 +28,11 @@ export default function APressable({
       onPress={onPress}
       onLongPress={onLongPress}
       style={({ pressed }) => ({
-        backgroundColor: pressed ? colors.listPressed : 'transparent',
         alignItems: 'center',
         flexDirection,
         ...style,
+        // Applied after style so rows with their own background still show press feedback.
+        backgroundColor: pressed ? colors.listPressed : (style?.backgroundColor || 'transparent'),
       })}
     >
       {children}
