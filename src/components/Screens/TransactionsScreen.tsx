@@ -419,6 +419,11 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
     return () => { loadGeneration.current += 1; };
   }, [onLoad]));
 
+  useEffect(() => {
+    setStartDate(new Date(`${defaultStart}T12:00:00`));
+    setEndDate(new Date(`${defaultEnd}T12:00:00`));
+  }, [defaultStart, defaultEnd]);
+
   const closeRow = (rowKey: string | number, rowMap: { [x: string]: { closeRow: () => void; }; }) => {
     if (rowMap[rowKey]) {
       rowMap[rowKey].closeRow();
