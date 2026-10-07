@@ -535,8 +535,8 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
       )}
       <SwipeListView
         useSectionList
-      keyboardDismissMode="on-drag"
-      keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={false}
         refreshControl={(
           <RefreshControl
