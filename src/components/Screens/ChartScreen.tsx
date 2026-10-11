@@ -2,8 +2,6 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { Animated, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import PagerView, { PagerViewOnPageScrollEventData } from 'react-native-pager-view';
 import { Entypo, Feather } from '@expo/vector-icons';
 
 import { RootDispatch, RootState } from '../../store';
@@ -12,12 +10,12 @@ import AssetsHistoryChart from '../Charts/AssetsHistoryChart';
 import BalanceHistoryChart from '../Charts/BalanceHistoryChart';
 import Pagination from '../UI/Pagination';
 import { AStack } from '../UI/ALibrary';
+import PagerView, { PagerViewOnPageScrollEventData } from '../UI/PagerView';
 
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
 export default function ChartScreen() {
   const { colors } = useThemeColors();
-  const safeAreaInsets = useSafeAreaInsets();
   const start = useSelector((state: RootState) => state.firefly.rangeDetails.start);
   const end = useSelector((state: RootState) => state.firefly.rangeDetails.end);
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
@@ -58,7 +56,7 @@ export default function ChartScreen() {
     <View
       style={{
         flex: 1,
-        paddingTop: safeAreaInsets.top + 53,
+        paddingTop: 8,
         backgroundColor: colors.backgroundColor,
         justifyContent: 'center',
       }}

@@ -26,7 +26,8 @@ import translate from '../i18n/locale';
 import { getContrastTextColor, useThemeColors } from '../lib/common';
 
 // Screens
-import HomeScreen, { CategoriesScreen } from '../components/Screens/HomeScreen';
+import HomeScreen from '../components/Screens/HomeScreen';
+import ChartScreen from '../components/Screens/ChartScreen';
 import FiltersScreen from '../components/Screens/FiltersScreen';
 import FilterScreen from '../components/Screens/FilterScreen';
 import CredentialCreateScreen from '../components/Screens/CredentialCreateScreen';
@@ -47,6 +48,7 @@ import {
 import PrivacyScreen from '../components/UI/PrivacyScreen';
 import { AbacusQuickAction } from '../types/quickAction';
 import ErrorBoundary from '../components/UI/ErrorBoundary';
+import OfflineNotice from '../components/UI/OfflineNotice';
 
 const Stack = createNativeStackNavigator();
 const TransactionStack = createNativeStackNavigator();
@@ -78,10 +80,10 @@ function TabBarPrimaryButton() {
   );
 }
 
-function TabBarCategoriesScreenIcon({ color }) {
+function TabBarChartScreenIcon({ color }) {
   return (
     <Ionicons
-      name="grid-outline"
+      name="stats-chart-outline"
       size={20}
       color={color}
     />
@@ -217,6 +219,7 @@ function Home() {
 
   return (
     <ErrorBoundary>
+      <OfflineNotice />
       <Tab.Navigator
         screenOptions={() => ({
           tabBarInactiveBackgroundColor: colors.tabBackgroundColor,
@@ -253,15 +256,15 @@ function Home() {
           }}
         />
         <Tab.Screen
-          name={translate('navigation_categories_tab')}
-          component={CategoriesScreen}
+          name={translate('navigation_chart_tab')}
+          component={ChartScreen}
           options={{
             headerShown: true,
             // eslint-disable-next-line react/no-unstable-nested-components
             header: ({ navigation }) => <NavigationHeader navigation={navigation} />,
             headerTransparent: false,
-            tabBarIcon: TabBarCategoriesScreenIcon,
-            tabBarTestID: 'navigation_categories_tab',
+            tabBarIcon: TabBarChartScreenIcon,
+            tabBarTestID: 'navigation_chart_tab',
           }}
         />
         <Tab.Screen

@@ -167,7 +167,7 @@ export default function BalanceHistoryChart() {
                 },
               }}
               interpolation="monotoneX"
-              data={earnedChart.map((pts, index) => ({ x: pts.x, y: pts.y + spentChart[index].y }))}
+              data={earnedChart.map((pts) => ({ x: pts.x, y: pts.y + (spentChart.find((point) => point.x === pts.x)?.y ?? 0) }))}
               name="lineBalance"
             />
             )}
@@ -189,7 +189,7 @@ export default function BalanceHistoryChart() {
               }}
               size={7}
               labels={({ datum }) => (datum.y !== 0 ? `${(round(datum.y / 1000, 1))}k` : '')}
-              data={earnedChart.map((pts, index) => ({ x: pts.x, y: pts.y + spentChart[index].y }))}
+              data={earnedChart.map((pts) => ({ x: pts.x, y: pts.y + (spentChart.find((point) => point.x === pts.x)?.y ?? 0) }))}
               name="ptsBalance"
             />
             )}

@@ -1,4 +1,5 @@
 export default {
+  offline_notice: 'Cannot reach the server. Available saved data is shown and may be out of date. Refresh to retry.',
   transaction_form_add_time: 'Add time',
   period_month: 'Month',
   period_quarter: 'Quarter',
@@ -30,6 +31,9 @@ export default {
   configuration_dark: 'Dark',
   configuration_system: 'System',
   configuration_private_mode: 'Private mode',
+  configuration_tap_hide_total: 'Tap to hide only the total balance',
+  home_show_total: 'Show total balance',
+  home_hide_total: 'Hide total balance',
   configuration_app_version: 'App Version',
   configuration_about: 'About',
   configuration_clear_option: 'Clear cache',

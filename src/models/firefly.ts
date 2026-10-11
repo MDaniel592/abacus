@@ -5,6 +5,7 @@ import { maxBy, minBy } from 'lodash';
 import semver from 'semver';
 import axios from 'axios';
 import periodBounds from '../lib/period';
+import accountChartPoints from '../lib/account-chart';
 import {
   discovery, redirectUri, addCredential, replaceAccessToken,
 } from '../lib/oauth';
@@ -206,12 +207,17 @@ export default createModel<RootModel>()({
           rangeDetails: { range, start, end },
         },
         currencies: { currentCode },
-        configuration: { selectedBrandStyle, displayAllAccounts },
+        configuration: { selectedBrandStyle },
       } = rootState;
 
-      const { data: accounts } = (await dispatch.configuration.apiFetch({
-        url: `/api/v1/chart/account/overview?start=${start}&end=${end}&preselected=${displayAllAccounts ? 'all' : ''}`,
-      })) as { data: AssetAccountType[] };
+      const response = await dispatch.configuration.apiFetch({
+        url: `/api/v1/chart/account/overview?start=${start}&end=${end}&preselected=all`,
+      }).catch(() => null);
+      if (!response) {
+        dispatch.firefly.setData({ accounts: [] });
+        return;
+      }
+      const accounts = response.data as AssetAccountType[];
       let colorIndex = 0;
 
       accounts
@@ -225,37 +231,15 @@ export default createModel<RootModel>()({
             accounts[index].color = colors[`brandStyle${colorIndex}`];
             colorIndex += 1;
           }
-          accounts[index].entries = range > 3
-            ? Object.keys(v.entries)
-              .filter((e, i) => i % 2 === 0)
-              .filter((e, i) => i % 2 === 0)
-              .filter((e, i) => i % 2 === 0)
-              .map((key) => {
-                const value = parseFloat(accounts[index].entries[key]);
-                const date = new Date(key);
-
-                return {
-                  x: +date,
-                  y: value,
-                };
-              })
-            : Object.keys(v.entries).map((key) => {
-              const value = parseFloat(accounts[index].entries[key]);
-              const date = new Date(key);
-
-              return {
-                x: +date,
-                y: value,
-              };
-            });
+          accounts[index].entries = accountChartPoints(v.entries as unknown as Record<string, string>, range);
           accounts[index].maxY = maxBy(
             accounts[index].entries,
             (o: { x: number; y: number }) => o.y,
-          ).y;
+          )?.y ?? 0;
           accounts[index].minY = minBy(
             accounts[index].entries,
             (o: { x: number; y: number }) => o.y,
-          ).y;
+          )?.y ?? 0;
         });
 
       dispatch.firefly.setData({ accounts: accounts.filter((account) => account.currencyCode === currentCode) });

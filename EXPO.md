@@ -23,7 +23,7 @@ Si prefieres compilar desde GitHub, conecta `MDaniel592/abacus` en la configurac
 
 ## Instalar en el S23 Ultra
 
-La primera versión local ya está disponible en [descargar APK 0.25.0 / 41 para ARM64](http://192.168.1.50:8095/downloads/abacus-personal-0.25.0-41-arm64.apk), desde la misma red que el servidor. En futuras compilaciones de EAS, utiliza el enlace que proporcione Expo. Abre el APK en el móvil. Permite la instalación desde el navegador o gestor de archivos cuando Android lo solicite.
+La versión actual se descarga desde el enlace fijo [APK más reciente para ARM64](http://192.168.1.50:8095/downloads/abacus-personal-latest-arm64.apk), disponible desde la misma red que el servidor. Cada publicación conserva también su archivo con número de versión y actualiza este enlace `latest`. Abre el APK en el móvil y permite la instalación desde el navegador o gestor de archivos cuando Android lo solicite.
 
 La app aparece como **Abacus Personal**, junto a la oficial. Hay que introducir la conexión a Firefly III en la nueva instalación. El APK funciona sin un servidor de desarrollo.
 
@@ -40,10 +40,10 @@ Las pruebas automatizadas comprueban la transición de cuentas y dos envíos con
 
 Documentación: [APK de Android](https://docs.expo.dev/build-reference/apk/), [compilar desde GitHub](https://docs.expo.dev/build/building-from-github/).
 
-## Primera compilación local verificada
+## Última compilación local verificada
 
-APK release de 60.902.670 bytes, paquete `io.github.mdaniel592.abacus`, versión `0.25.0`, versionCode `41`, arquitectura `arm64-v8a` para el S23 Ultra. Firma y alineación verificadas; todavía pendiente la prueba en el móvil.
+APK release de 62.024.006 bytes, paquete `io.github.mdaniel592.abacus`, versión `0.25.0`, versionCode `48`, arquitectura `arm64-v8a` para el S23 Ultra. Firma verificada con el mismo certificado que la versión 47; todavía pendiente la prueba en el móvil. El archivo versionado está en `design/downloads/abacus-personal-0.25.0-48-arm64.apk` y el enlace fijo apunta a esta compilación.
 
-SHA-256 del APK: `b0995590977f0be3da74540071897e8eae4e99914627a0081f68ea00f762d8d3`.
+SHA-256 del APK: `03f41735b64f743677c83266aefc536a3fab653d435027b4f0449d0e8115a948`.
 
-Se conserva el contenedor local `abacus-apk-build`, sus herramientas Android y la caché Gradle en `/opt/gradle-home`, además de los artefactos nativos del workspace. No eliminarlo para las próximas compilaciones locales. La primera ejecución agotó los 512 MiB de metaspace; la reanudación con 1 GiB pasó en 3 min 32 s y reutilizó 955 tareas. Este tiempo corresponde a reanudar esa compilación; no garantiza la duración de cambios futuros.
+Se conserva el contenedor local `abacus-apk-build`, sus herramientas Android y la caché Gradle para las próximas compilaciones locales. No eliminarlo para las próximas compilaciones. La compilación 47 tardó 3 min 24 s con las tareas JavaScript y Android necesarias para estos cambios y reutilizó 984 tareas.

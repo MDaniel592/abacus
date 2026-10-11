@@ -7,7 +7,7 @@ import { models, RootModel } from '../models';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  blacklist: [],
+  blacklist: ['loading'],
 };
 
 type FullModel = ExtraModelsFromLoading<RootModel, { type: 'full' }>

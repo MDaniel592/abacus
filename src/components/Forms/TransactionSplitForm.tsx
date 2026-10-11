@@ -415,9 +415,10 @@ export default function TransactionSplitForm({
           {translate('transaction_form_notes_label')}
         </ALabel>
         <AInput
-          height={40}
-          numberOfLines={2}
+          height={90}
+          numberOfLines={3}
           value={formData.notes}
+          autoGrow
           onChangeText={(value) => setTransaction({
             ...formData,
             notes: value,

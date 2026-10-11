@@ -56,6 +56,7 @@ export default function CredentialsScreen({ navigation, route }: ScreenType) {
 
       axios.defaults.headers.Authorization = `Bearer ${accessToken}`;
       dispatch.configuration.setBackendURL(currentBackendURL);
+      dispatch.configuration.setCacheIdentity(credential.email);
       dispatch.currencies.setCurrentCode('');
 
       if (!isTokenFresh(expiresIn) && refreshToken) {

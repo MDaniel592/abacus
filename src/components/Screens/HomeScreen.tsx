@@ -18,11 +18,11 @@ import {
   ScrollView,
 } from 'react-native';
 import axios from 'axios';
-import PagerView from 'react-native-pager-view';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import moment from 'moment';
+import PagerView from '../UI/PagerView';
 import usePrivateNumberFormat from '../../lib/use-private-number-format';
 import { RootDispatch, RootState } from '../../store';
 import translate from '../../i18n/locale';
@@ -415,6 +415,10 @@ function NetWorth() {
   const localNumberFormat = usePrivateNumberFormat();
   const { colorScheme } = useThemeColors();
   const hideBalance = useSelector((state: RootState) => state.configuration.hideBalance);
+  const tapToHideNetWorth = useSelector((state: RootState) => Boolean(state.configuration.tapToHideNetWorth));
+  const hideNetWorth = useSelector((state: RootState) => Boolean(state.configuration.hideNetWorth));
+  const dispatch = useDispatch<RootDispatch>();
+  const totalHidden = hideBalance || (tapToHideNetWorth && hideNetWorth);
   const netWorth = useSelector((state: RootState) => state.firefly.netWorth);
   const earned = useSelector((state: RootState) => state.firefly.earned);
   const spent = useSelector((state: RootState) => state.firefly.spent);
@@ -435,9 +439,17 @@ function NetWorth() {
       >
         <AText fontSize={12} color="white">{translate('home_net_worth')}</AText>
         <ASkeleton loading={loading}>
-          <AText fontSize={26} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} py={2}>
-            {hideBalance ? '••••••' : localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
-          </AText>
+          <Pressable
+            disabled={!tapToHideNetWorth || hideBalance || loading}
+            accessibilityRole={tapToHideNetWorth && !hideBalance ? 'button' : undefined}
+            accessibilityLabel={tapToHideNetWorth && !hideBalance ? translate(totalHidden ? 'home_show_total' : 'home_hide_total') : undefined}
+            onPress={() => dispatch.configuration.toggleNetWorthVisibility()}
+            style={{ minHeight: 48, justifyContent: 'center' }}
+          >
+            <AText fontSize={26} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} py={2}>
+              {totalHidden ? '••••••' : localNumberFormat(currentCode, parseFloat(netWorth[0]?.monetaryValue || '0'))}
+            </AText>
+          </Pressable>
         </ASkeleton>
         <View style={{
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 6,
@@ -479,16 +491,6 @@ function NetWorth() {
   );
 }
 
-export function CategoriesScreen() {
-  const rangeDetails = useSelector((state: RootState) => state.firefly.rangeDetails);
-  const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
-  const dispatch = useDispatch<RootDispatch>();
-  useFocusEffect(useCallback(() => {
-    dispatch.categories.getInsightCategories().catch(() => {});
-  }, [dispatch, rangeDetails.start, rangeDetails.end, currentCode]));
-  return <ErrorBoundary><InsightCategories /></ErrorBoundary>;
-}
-
 export default function HomeScreen() {
   const { colors } = useThemeColors();
   const { brandStyle, brandStyleContrast } = useBrandStyle();
@@ -498,7 +500,7 @@ export default function HomeScreen() {
   const dispatch = useDispatch<RootDispatch>();
   const viewPagerRef = useRef<PagerView>(null);
   const [selectedPage, setSelectedPage] = useState(0);
-  const pages = ['home_accounts', 'home_budgets', 'home_bills', 'home_piggy_banks'];
+  const pages = ['home_accounts', 'home_categories', 'home_budgets', 'home_bills', 'home_piggy_banks'];
 
   useEffect(() => {
     Promise.all([dispatch.currencies.getCurrencies(), dispatch.configuration.getCurrentApiVersion()]).catch(() => {});
@@ -540,6 +542,7 @@ export default function HomeScreen() {
         </View>
         <PagerView ref={viewPagerRef} initialPage={0} style={{ flex: 1 }} onPageSelected={(event) => setSelectedPage(event.nativeEvent.position)}>
           <View key="accounts" style={{ flex: 1 }} collapsable={false}><AssetsAccounts /></View>
+          <View key="categories" style={{ flex: 1 }} collapsable={false}><InsightCategories /></View>
           <View key="budgets" style={{ flex: 1 }} collapsable={false}><InsightBudgets /></View>
           <View key="bills" style={{ flex: 1 }} collapsable={false}><Bills /></View>
           <View key="piggy" style={{ flex: 1 }} collapsable={false}><PiggyBanks /></View>

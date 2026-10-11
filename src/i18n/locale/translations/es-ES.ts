@@ -1,4 +1,5 @@
 export default {
+  offline_notice: 'No se puede conectar con el servidor. Se muestran los datos guardados disponibles; pueden estar desactualizados. Vuelve a cargar para reintentar.',
   transaction_form_add_time: 'Añadir hora',
   category_total_balance: 'Balance total',
   period_month: 'Mes',
@@ -40,6 +41,9 @@ export default {
   configuration_dark: 'Oscuro',
   configuration_system: 'Sistema',
   configuration_private_mode: 'Modo privado',
+  configuration_tap_hide_total: 'Ocultar solo el saldo total al tocarlo',
+  home_show_total: 'Mostrar saldo total',
+  home_hide_total: 'Ocultar saldo total',
   configuration_app_version: 'Versión de aplicación',
   configuration_about: 'Acerca de Abacus',
   configuration_clear_option: 'Borrar datos y restablecer aplicación',
@@ -87,6 +91,7 @@ export default {
   auth_form_submit_button_initial: 'Iniciar sesión',
   auth_form_submit_button_loading: 'Enviando...',
   home_accounts: 'Cuentas',
+  home_categories: 'Categorías',
   home_all_accounts: 'Ver todas',
   layout_new_update_header: 'Nueva Actualización Disponible',
   layout_new_update_body_text: 'Siempre puedes actualizar más tarde en la pestaña de Ajustes.',

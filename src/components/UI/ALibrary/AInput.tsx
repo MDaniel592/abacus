@@ -27,6 +27,7 @@ type AInputType = {
   color?: string
   fontSize?: number
   numberOfLines?: number
+  autoGrow?: boolean
   style?: AStyle
   testID?: string
 }
@@ -50,10 +51,12 @@ export default function AInput({
   color,
   fontSize = 14,
   numberOfLines = 1,
+  autoGrow = false,
   style = null,
 }: AInputType) {
   const { colors } = useThemeColors();
   const [isFocused, setIsFocused] = React.useState(false);
+  const [contentHeight, setContentHeight] = React.useState(height);
   const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
   const handleFocus = (focusState: boolean, callback: () => void) => {
     setIsFocused(focusState);
@@ -85,11 +88,17 @@ export default function AInput({
       <TextInput
         testID={testID}
         multiline={numberOfLines > 1}
+        submitBehavior={numberOfLines > 1 ? 'newline' : undefined}
+        scrollEnabled={!autoGrow}
+        onContentSizeChange={autoGrow ? (event) => {
+          setContentHeight(Math.ceil(event.nativeEvent.contentSize.height));
+        } : undefined}
         accessible
         secureTextEntry={type === 'password'}
         style={{
           flex: 1,
-          height,
+          height: autoGrow ? Math.max(height, contentHeight) : height,
+          textAlignVertical: numberOfLines > 1 ? 'top' : 'center',
           fontSize,
           textAlign,
           fontFamily: bold ? 'Montserrat-Bold' : 'Montserrat-Regular',

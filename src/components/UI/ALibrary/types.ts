@@ -1,6 +1,8 @@
 import { FlexAlignType } from 'react-native';
 
 export interface AStyle {
+  minHeight?: number
+  lineHeight?: number
   flex?: number
   flexWrap?: 'wrap' | 'nowrap'
   display?: 'flex' | 'none'

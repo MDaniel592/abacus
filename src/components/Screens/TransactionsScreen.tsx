@@ -518,7 +518,7 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
           </TouchableOpacity>
           )}
           <ADateFilterButton currentDate={start} selectDate={(date: Date) => { setStartDate(date); setEndDate(moment(date).endOf('month').toDate()); }} />
-          <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
+          <AFilterButton filterType={translate('transaction_type_label')} selected={type} selectFilter={(selected: '' | 'withdrawal' | 'deposit' | 'transfer') => setType(selected)} navigation={navigation} capitalize />
           <AFilterButton filterKind="category" filterType={translate('transaction_form_category_label')} selected={category} selectFilter={setCategory} navigation={navigation} />
           <AFilterButton filterKind="tag" filterType={translate('transaction_form_tags_label')} selected={tag} selectFilter={setTag} navigation={navigation} />
           <AFilterButton filterType={translate('currency')} selected={currentCode} selectFilter={(selected) => setCurrentCode(selected)} navigation={navigation} />

@@ -30,6 +30,7 @@ import {
 export default function SettingsScreen({ navigation }: ScreenType) {
   const { colors } = useThemeColors();
   const hideBalance = useSelector((state: RootState) => state.configuration.hideBalance);
+  const tapToHideNetWorth = useSelector((state: RootState) => Boolean(state.configuration.tapToHideNetWorth));
   const preferredScheme = useSelector((state: RootState) => state.configuration.preferredColorScheme);
   const closeTransactionScreen = useSelector((state: RootState) => state.configuration.closeTransactionScreen);
   const backendURL = useSelector((state: RootState) => state.configuration.backendURL);
@@ -177,6 +178,16 @@ export default function SettingsScreen({ navigation }: ScreenType) {
         >
           <AText fontSize={14}>{translate('configuration_private_mode')}</AText>
           <Switch accessibilityLabel={translate('configuration_private_mode')} thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} value={hideBalance} onValueChange={(value) => { dispatch.configuration.setHideBalance(value); }} />
+        </AStack>
+        <AStack row justifyContent="space-between" style={{ minHeight: 48, marginHorizontal: 10 }}>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_tap_hide_total')}</AText>
+          <Switch
+            accessibilityLabel={translate('configuration_tap_hide_total')}
+            thumbColor="white"
+            trackColor={{ false: '#767577', true: selectedBrandStyle }}
+            value={tapToHideNetWorth}
+            onValueChange={(value) => { dispatch.configuration.setTapToHideNetWorth(value); }}
+          />
         </AStack>
         <APressable
           flexDirection="row"
