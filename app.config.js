@@ -56,7 +56,7 @@ export default {
     },
     playStoreUrl: 'https://play.google.com/store/apps/details?id=abacus.fireflyiii.android.app',
     package: IS_DEV ? 'io.github.mdaniel592.abacus.dev' : 'io.github.mdaniel592.abacus',
-    versionCode: 48,
+    versionCode: 53,
   },
   scheme: 'abacuspersonal',
   githubUrl: 'https://github.com/MDaniel592/abacus',

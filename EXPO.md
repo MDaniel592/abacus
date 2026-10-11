@@ -42,8 +42,12 @@ Documentación: [APK de Android](https://docs.expo.dev/build-reference/apk/), [c
 
 ## Última compilación local verificada
 
-APK release de 62.024.006 bytes, paquete `io.github.mdaniel592.abacus`, versión `0.25.0`, versionCode `48`, arquitectura `arm64-v8a` para el S23 Ultra. Firma verificada con el mismo certificado que la versión 47; todavía pendiente la prueba en el móvil. El archivo versionado está en `design/downloads/abacus-personal-0.25.0-48-arm64.apk` y el enlace fijo apunta a esta compilación.
+APK release compilado el 11 de octubre de 2026, de 62,029,478 bytes, paquete `io.github.mdaniel592.abacus`, versión `0.25.0`, versionCode `53`, arquitectura `arm64-v8a` para el S23 Ultra. Firma verificada con el mismo certificado que la versión 52. El archivo versionado está en `design/downloads/abacus-personal-0.25.0-53-arm64.apk` y el enlace fijo apunta a esta compilación.
 
-SHA-256 del APK: `03f41735b64f743677c83266aefc536a3fab653d435027b4f0449d0e8115a948`.
+Inicio: con «Todas las cuentas» desactivado se ocultan también las cuentas con saldo 0. Incluye el saldo diario por cuenta en Movimientos de la versión 52.
 
-Se conserva el contenedor local `abacus-apk-build`, sus herramientas Android y la caché Gradle para las próximas compilaciones locales. No eliminarlo para las próximas compilaciones. La compilación 47 tardó 3 min 24 s con las tareas JavaScript y Android necesarias para estos cambios y reutilizó 984 tareas.
+Validación: lint correcto y compilación release ARM64 correcta. Pendiente la revisión en el móvil Android contra Firefly III.
+
+SHA-256 del APK: `dfc745b43917c1b5200b92ad17ab8a67a7728f648a6b7a18736e189b34b5865f`.
+
+Se conserva el contenedor local `abacus-apk-build`, sus herramientas Android y la caché Gradle para las próximas compilaciones locales. No eliminarlo para las próximas compilaciones. La compilación 53 tardó 3 min 8 s con las tareas JavaScript y Android necesarias para estos cambios y reutilizó 988 tareas. Se conservan las versiones 49, 50, 51 y 52.
