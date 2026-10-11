@@ -66,7 +66,8 @@ function AssetsAccounts() {
   };
 
   const sortedAccounts = accounts
-    .filter((a) => a.display || displayAllAccounts)
+    // Without "all accounts", show only front page accounts that hold money
+    .filter((a) => displayAllAccounts || (a.display && Math.abs(parseFloat(a.attributes.currentBalance) || 0) >= 0.005))
     .sort((a, b) => {
       if (nameSortOrder) {
         return nameSortOrder === 'asc'
