@@ -1,4 +1,9 @@
 export default {
+  home_period_result: 'Period result',
+  offline_details: 'Available saved data may be out of date. Refresh the screen to retry.',
+  offline_status: 'Saved data · View status',
+  offline_title: 'Cannot reach the server',
+
   offline_notice: 'Cannot reach the server. Available saved data is shown and may be out of date. Refresh to retry.',
   transaction_form_add_time: 'Add time',
   period_month: 'Month',

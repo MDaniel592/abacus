@@ -40,6 +40,7 @@ import {
 import AFilterButton from '../UI/ALibrary/AFilterButton';
 import AButton from '../UI/ALibrary/AButton';
 import ADateFilterButton from '../UI/ALibrary/ADateFilterButton';
+import OfflineNotice from '../UI/OfflineNotice';
 
 const ITEM_HEIGHT = 60;
 
@@ -56,7 +57,7 @@ function ListFooterComponent({ onLoadMore, initLoading }) {
   return useMemo(() => (loading || initLoading || (page < totalPages)) && (
     <AStackFlex
       style={{
-        height: ITEM_HEIGHT,
+        minHeight: ITEM_HEIGHT,
       }}
     >
       {(loading || initLoading) && (
@@ -154,11 +155,12 @@ function RenderItem({ item }) {
   return useMemo(() => (
     <APressable
       style={{
-        height: ITEM_HEIGHT,
+        minHeight: ITEM_HEIGHT,
         backgroundColor: colors.tileBackgroundColor,
         borderTopWidth: 0.5,
         borderColor: colors.listBorderColor,
         paddingHorizontal: 16,
+        paddingVertical: 10,
       }}
       onPress={() => {
         goToEdit(item.id, {
@@ -187,8 +189,8 @@ function RenderItem({ item }) {
       >
         <MaterialCommunityIcons name={typeAttributes.icon} size={18} color={typeAttributes.color} />
       </AView>
-      <AView style={{ flex: 1, marginRight: 10 }}>
-        <AText fontSize={14} numberOfLines={1} bold>
+      <AView style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+        <AText fontSize={14} numberOfLines={2} bold>
           {item.attributes.groupTitle}
           {item.attributes.groupTitle?.length > 0 ? ': ' : ''}
           {split.description}
@@ -197,7 +199,7 @@ function RenderItem({ item }) {
           {meta}
         </AText>
       </AView>
-      <AText fontSize={14} color={typeAttributes.color} bold numberOfLines={1}>
+      <AText fontSize={14} color={typeAttributes.color} bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ maxWidth: '40%', flexShrink: 1 }}>
         {`${typeAttributes.prefix}${localNumberFormat(split.currencyCode, item.attributes.transactions.reduce((total, s) => total + parseFloat(s.amount), 0))}`}
       </AText>
     </APressable>
@@ -233,7 +235,8 @@ function RenderHiddenItem({ handleOnPressCopy, handleOnPressDelete }) {
     <AStackFlex row>
       <APressable
         style={{
-          height: ITEM_HEIGHT,
+          height: '100%',
+          minHeight: ITEM_HEIGHT,
           width: '50%',
           backgroundColor: colors.brandWarning,
           paddingHorizontal: 10,
@@ -253,7 +256,8 @@ function RenderHiddenItem({ handleOnPressCopy, handleOnPressDelete }) {
       </APressable>
       <APressable
         style={{
-          height: ITEM_HEIGHT,
+          height: '100%',
+          minHeight: ITEM_HEIGHT,
           width: '50%',
           backgroundColor: colors.red,
           paddingHorizontal: 10,
@@ -471,8 +475,12 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
           borderColor: colors.listBorderColor,
         }}
       >
-        <AView style={{ height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
-          <AText fontSize={20} bold>{translate('navigation_transactions_tab')}</AText>
+        <AView style={{
+          minHeight: 48, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center',
+        }}
+        >
+          <AText fontSize={20} bold style={{ flexShrink: 1 }}>{translate('navigation_transactions_tab')}</AText>
+          <OfflineNotice />
         </AView>
         <AView style={{ paddingHorizontal: 16 }}>
           <AInput

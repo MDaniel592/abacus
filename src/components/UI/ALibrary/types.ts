@@ -4,6 +4,8 @@ export interface AStyle {
   minHeight?: number
   lineHeight?: number
   flex?: number
+  flexShrink?: number
+  minWidth?: number
   flexWrap?: 'wrap' | 'nowrap'
   display?: 'flex' | 'none'
   height?: number | '100%' | '90%' | '80%' | '70%' | '60%' | '50%' | '150%'

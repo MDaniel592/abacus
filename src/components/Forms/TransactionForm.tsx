@@ -9,6 +9,7 @@ import {
   Keyboard, Platform, KeyboardAvoidingView, ScrollView, Switch, ActivityIndicator, View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import * as Crypto from 'expo-crypto';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,7 +71,7 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
           handleDelete={() => deleteTransactionSplit(i)}
         />
       ))}
-      <AButton type="transparent" style={{ height: 36, marginTop: 4 }} onPress={() => setShowOptions((value) => !value)}>
+      <AButton type="transparent" style={{ minHeight: 48, height: undefined, marginTop: 4 }} onPress={() => setShowOptions((value) => !value)}>
         <AText fontSize={12} color={colors.greyLight}>{translate('transaction_form_more_options')}</AText>
         <Ionicons name={showOptions ? 'chevron-up' : 'chevron-down'} size={15} color={colors.greyLight} style={{ marginLeft: 6 }} />
       </AButton>
@@ -78,7 +79,8 @@ function MultipleTransactionSplitForm({ isNew, splits, title }) {
       <>
         <AButton
           style={{
-            height: 40,
+            minHeight: 48,
+            height: undefined,
             marginTop: 5,
             borderWidth: 0.5,
             borderColor: colors.listBorderColor,
@@ -106,7 +108,15 @@ function TransactionFormButtons({ handleSubmit }) {
   const loading = useSelector((state: RootState) => state.loading.effects.transactions.upsertTransaction?.loading);
 
   return (
-    <AButton type="primary" loading={loading} disabled={loading} style={{ height: 44, marginBottom: 0 }} onPress={handleSubmit}>
+    <AButton
+      type="primary"
+      loading={loading}
+      disabled={loading}
+      style={{
+        minHeight: 48, height: undefined, paddingVertical: 12, marginBottom: 0,
+      }}
+      onPress={handleSubmit}
+    >
       <AStackFlex row>
         <Ionicons name="cloud-upload-sharp" size={20} color={brandStyleContrast} style={{ margin: 5 }} />
         <AText color={brandStyleContrast} fontSize={13}>{translate('transaction_form_submit_button')}</AText>
@@ -125,6 +135,7 @@ export default function TransactionForm({
   const dispatch = useDispatch<RootDispatch>();
   const loading = useSelector((state: RootState) => state.loading.effects.transactions.upsertTransaction?.loading);
   const submitting = useRef(false);
+  const insets = useSafeAreaInsets();
   const closeTransactionScreen = useSelector((state: RootState) => state.configuration.closeTransactionScreen);
 
   useEffect(() => {
@@ -167,14 +178,14 @@ export default function TransactionForm({
         style={{
           flex: 1,
         }}
-        contentContainerStyle={{ padding: 10, paddingBottom: 12 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
         keyboardShouldPersistTaps="handled"
         bounces={false}
       >
         <MultipleTransactionSplitForm isNew={id === '-1'} title={title} splits={splits} />
       </ScrollView>
       <View style={{
-        paddingHorizontal: 12, paddingVertical: 10, borderTopWidth: 0.5, borderColor: colors.listBorderColor, backgroundColor: colors.tileBackgroundColor,
+        paddingHorizontal: 16, paddingTop: 8, paddingBottom: Math.max(8, insets.bottom), borderTopWidth: 0.5, borderColor: colors.listBorderColor, backgroundColor: colors.tileBackgroundColor,
       }}
       >
         <TransactionFormButtons handleSubmit={handleSubmit} />

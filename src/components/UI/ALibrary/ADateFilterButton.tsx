@@ -53,7 +53,8 @@ export default function ADateFilterButton({
               borderRadius: 18,
               paddingLeft: 12,
               paddingRight: 10,
-              height: 36,
+              minHeight: 36,
+              paddingVertical: 8,
             }}
           >
             <Ionicons name="calendar-outline" size={15} color={colors.text} style={{ marginRight: 6 }} />

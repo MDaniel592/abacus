@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { CommonActions } from '@react-navigation/native';
 import {
-  View, Pressable, Modal, TextInput,
+  View, Pressable, Modal, TextInput, useWindowDimensions,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,11 +12,14 @@ import { AText } from './ALibrary';
 import { RootDispatch, RootState } from '../../store';
 import { useBrandStyle, useThemeColors } from '../../lib/common';
 import translate from '../../i18n/locale';
+import OfflineNotice from './OfflineNotice';
 
 export default function NavigationHeader({ navigation }) {
   const { colors } = useThemeColors();
   const { brandStyle, brandStyleText, brandStyleContrast } = useBrandStyle();
   const insets = useSafeAreaInsets();
+  const { width, fontScale } = useWindowDimensions();
+  const stacked = width < 340 || fontScale > 1.4;
   const currentCode = useSelector((state: RootState) => state.currencies.currentCode);
   const title = useSelector((state: RootState) => state.firefly.rangeDetails.title);
   const start = useSelector((state: RootState) => state.firefly.rangeDetails.start);
@@ -115,12 +118,26 @@ export default function NavigationHeader({ navigation }) {
         </Pressable>
       </Modal>
       <View style={{
-        height: 44, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        minHeight: 48, paddingHorizontal: 16, flexDirection: stacked ? 'column' : 'row', alignItems: stacked ? 'stretch' : 'center', justifyContent: 'space-between',
       }}
       >
-        <AText fontSize={20} bold color={brandStyleText}>abacus.</AText>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel={translate('home_previous_period')} onPress={() => changePeriod(-1)} hitSlop={6} style={{ padding: 11 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <AText fontSize={20} bold color={brandStyleText}>abacus.</AText>
+          <OfflineNotice />
+        </View>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: stacked ? undefined : 1, minWidth: 0,
+        }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={translate('home_previous_period')}
+            hitSlop={{ left: 8, right: 8 }}
+            onPress={() => changePeriod(-1)}
+            style={{
+              width: 32, minHeight: 48, alignItems: 'center', justifyContent: 'center',
+            }}
+          >
             <Ionicons name="chevron-back" size={18} color={colors.greyLight} />
           </Pressable>
           <Pressable
@@ -129,14 +146,22 @@ export default function NavigationHeader({ navigation }) {
             onPress={() => { setPickerYear(moment(start).format('YYYY')); setPickerRange(range); setPickerOpen(true); }}
             onLongPress={() => navigation.dispatch(CommonActions.navigate({ name: 'FiltersScreen' }))}
             style={{
-              flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 10,
+              flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4, paddingVertical: 10, paddingHorizontal: 4, minHeight: 48, flexShrink: 1,
             }}
           >
-            <AText fontSize={12} bold>{title}</AText>
+            <AText fontSize={12} bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ flexShrink: 1 }}>{title}</AText>
             <AText fontSize={10} color={colors.greyLight}>{currentCode}</AText>
             <Ionicons name="chevron-down" size={12} color={colors.greyLight} />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={translate('home_next_period')} onPress={() => changePeriod(1)} hitSlop={6} style={{ padding: 11 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={translate('home_next_period')}
+            hitSlop={{ left: 8, right: 8 }}
+            onPress={() => changePeriod(1)}
+            style={{
+              width: 32, minHeight: 48, alignItems: 'center', justifyContent: 'center',
+            }}
+          >
             <Ionicons name="chevron-forward" size={18} color={colors.greyLight} />
           </Pressable>
         </View>

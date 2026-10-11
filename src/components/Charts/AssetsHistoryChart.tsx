@@ -79,17 +79,20 @@ export default function AssetsHistoryChart() {
             alignItems="center"
             justifyContent="space-between"
             style={{
-              paddingHorizontal: 10,
+              paddingHorizontal: 16,
               paddingVertical: 10,
             }}
           >
-            <AText fontSize={24} bold>
+            <AText fontSize={20} bold style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
               {translate('assets_history_chart')}
               {' '}
               {currentCode}
             </AText>
-            <AStackFlex row justifyContent="flex-end" gap={10}>
+            <AStackFlex flex={0} row justifyContent="flex-end" style={{ width: 48 }}>
               <Pressable
+                style={{
+                  minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center',
+                }}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch();
                   dispatch.firefly.getAccountChart();
@@ -248,7 +251,7 @@ export default function AssetsHistoryChart() {
                 borderColor: chart.color,
                 borderWidth: 2,
                 borderRadius: 10,
-                paddingHorizontal: 10,
+                paddingHorizontal: 16,
                 height: 32,
                 justifyContent: 'center',
                 margin: 2,

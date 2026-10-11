@@ -52,7 +52,8 @@ export default function AFilterButton({
           paddingLeft: 14,
           paddingRight: 10,
           marginRight: 8,
-          height: 36,
+          minHeight: 36,
+          paddingVertical: 8,
         }}
       >
         <AText fontSize={13} color={textColor} bold={Boolean(selected)} capitalize={capitalize} numberOfLines={1} maxWidth={160}>

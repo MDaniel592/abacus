@@ -128,7 +128,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
 
   return (
     <AScrollView>
-      <AText py={8} px={10} fontSize={16} bold>
+      <AText py={8} px={16} fontSize={16} bold>
         {translate('configuration_appearance')}
       </AText>
       <AView
@@ -142,9 +142,9 @@ export default function SettingsScreen({ navigation }: ScreenType) {
         <AStack
           row
           style={{
-            height: 42,
-            marginLeft: 8,
-            marginRight: 8,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginHorizontal: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
@@ -155,7 +155,8 @@ export default function SettingsScreen({ navigation }: ScreenType) {
               onPress={() => dispatch.configuration.setPreferredColorScheme(choice.value as 'light' | 'dark' | null)}
               style={{
                 flex: 1,
-                height: 30,
+                minHeight: 36,
+                paddingVertical: 8,
                 justifyContent: 'center',
                 alignItems: 'center',
                 borderRadius: 8,
@@ -171,15 +172,16 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 42,
-            marginLeft: 10,
-            marginRight: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_private_mode')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_private_mode')}</AText>
           <Switch accessibilityLabel={translate('configuration_private_mode')} thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} value={hideBalance} onValueChange={(value) => { dispatch.configuration.setHideBalance(value); }} />
         </AStack>
-        <AStack row justifyContent="space-between" style={{ minHeight: 48, marginHorizontal: 10 }}>
+        <AStack row justifyContent="space-between" style={{ minHeight: 48, marginHorizontal: 16 }}>
           <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_tap_hide_total')}</AText>
           <Switch
             accessibilityLabel={translate('configuration_tap_hide_total')}
@@ -195,14 +197,15 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           style={{
             justifyContent: 'space-between',
             alignItems: 'center',
-            height: 42,
-            marginLeft: 10,
-            marginRight: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
             borderTopWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_theme_selection')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_theme_selection')}</AText>
           <AStack row>
             <AView style={{
               width: 18, height: 18, borderRadius: 9, backgroundColor: selectedBrandStyle, marginRight: 8,
@@ -212,7 +215,7 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           </AStack>
         </APressable>
       </AView>
-      <AText py={8} px={10} fontSize={16} bold>
+      <AText py={8} px={16} fontSize={16} bold>
         {translate('configuration_security')}
       </AText>
       <AView
@@ -227,50 +230,51 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 42,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginLeft: 10,
-            marginRight: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>URL</AText>
-          <AText fontSize={14} onPress={() => Linking.openURL(backendURL)} underline>{backendURL}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>URL</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingLeft: 12 }} textAlign="right" onPress={() => Linking.openURL(backendURL)} underline>{backendURL}</AText>
         </AStack>
         <APressable
           flexDirection="row"
           onPress={goToAccounts}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            marginLeft: 10,
-            marginRight: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_manage_credentials')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_manage_credentials')}</AText>
           <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
         <AStack
           row
           justifyContent="space-between"
           style={{
-            height: 42,
-            marginLeft: 10,
-            marginRight: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
           }}
         >
-          <AText fontSize={14}>{translate('auth_form_biometrics_lock')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('auth_form_biometrics_lock')}</AText>
           <AView>
             <Switch thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} onValueChange={() => bioAuthCallback(setUseBiometricAuth)} value={useBiometricAuth} />
           </AView>
         </AStack>
       </AView>
 
-      <AText py={8} px={10} fontSize={16} bold>
+      <AText py={8} px={16} fontSize={16} bold>
         {translate('configuration_about')}
       </AText>
       <AView
@@ -285,29 +289,31 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 42,
-            marginLeft: 10,
-            paddingRight: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_app_version')}</AText>
-          <AText fontSize={14}>{Application.nativeApplicationVersion}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_app_version')}</AText>
+          <AText fontSize={14} textAlign="right">{Application.nativeApplicationVersion}</AText>
         </AStack>
         <APressable
           flexDirection="row"
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus/discussions/')}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingRight: 10,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginRight: 16,
+            marginLeft: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_share_feedback')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_share_feedback')}</AText>
           <Octicons name="cross-reference" size={20} color="gray" />
         </APressable>
         <APressable
@@ -315,14 +321,15 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus/issues/new')}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingRight: 10,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginRight: 16,
+            marginLeft: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_report_issue')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_report_issue')}</AText>
           <Octicons name="issue-opened" size={20} color="gray" />
         </APressable>
         <APressable
@@ -330,14 +337,15 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus')}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingRight: 10,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginRight: 16,
+            marginLeft: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_sources')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_sources')}</AText>
           <AntDesign name="github" size={22} color="gray" />
         </APressable>
         <APressable
@@ -345,16 +353,17 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={reviewApp}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingRight: 10,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginRight: 16,
+            marginLeft: 16,
           }}
         >
-          <AText fontSize={14}>{translate(Platform.select({ ios: 'configuration_review_app_ios', android: 'configuration_review_app_android' }))}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate(Platform.select({ ios: 'configuration_review_app_ios', android: 'configuration_review_app_android' }))}</AText>
           <Ionicons name={Platform.select({ ios: 'logo-apple-appstore', android: 'logo-google-playstore' })} size={23} color="gray" />
         </APressable>
       </AView>
-      <AText py={8} px={10} fontSize={16} bold>
+      <AText py={8} px={16} fontSize={16} bold>
         {translate('configuration_transaction_form')}
       </AText>
       <AView
@@ -369,20 +378,20 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           row
           justifyContent="space-between"
           style={{
-            height: 42,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
           }}
         >
-          <AText fontSize={14}>{translate('close_after_transaction')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('close_after_transaction')}</AText>
           <AView>
             <Switch thumbColor="white" trackColor={{ false: '#767577', true: selectedBrandStyle }} onValueChange={handleCheckBoxChange} value={closeTransactionScreen} />
           </AView>
         </AStack>
       </AView>
 
-      <AText py={8} px={10} fontSize={16} bold>
+      <AText py={8} px={16} fontSize={16} bold>
         {translate('configuration_debug')}
       </AText>
       <AView
@@ -398,15 +407,15 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={() => Linking.openURL('https://github.com/victorbalssa/abacus/blob/master/.github/HELP.md')}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_get_help')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_get_help')}</AText>
           <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
         <APressable
@@ -414,15 +423,15 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={showResetCacheAlert}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
             borderBottomWidth: 0.5,
             borderColor: colors.listBorderColor,
           }}
         >
-          <AText fontSize={14}>{translate('configuration_clear_option')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('configuration_clear_option')}</AText>
           <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
         <APressable
@@ -430,13 +439,13 @@ export default function SettingsScreen({ navigation }: ScreenType) {
           onPress={showLogoutAlert}
           style={{
             justifyContent: 'space-between',
-            height: 42,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            marginLeft: 10,
+            minHeight: 44,
+            paddingVertical: 6,
+            marginLeft: 16,
+            marginRight: 16,
           }}
         >
-          <AText fontSize={14}>{translate('go_to_credentials')}</AText>
+          <AText fontSize={14} style={{ flex: 1, paddingRight: 12 }}>{translate('go_to_credentials')}</AText>
           <FontAwesome name="angle-right" size={22} color={colors.greyLight} />
         </APressable>
       </AView>

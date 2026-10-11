@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   TextInput,
+  useWindowDimensions,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { AStyle } from './types';
@@ -55,6 +56,8 @@ export default function AInput({
   style = null,
 }: AInputType) {
   const { colors } = useThemeColors();
+  const { fontScale } = useWindowDimensions();
+  const inputHeight = Math.max(height, Math.ceil(fontSize * fontScale * 1.5 + 10));
   const [isFocused, setIsFocused] = React.useState(false);
   const [contentHeight, setContentHeight] = React.useState(height);
   const selectedBrandStyle = useSelector((state: RootState) => state.configuration.selectedBrandStyle || colors.brandStyle);
@@ -97,7 +100,7 @@ export default function AInput({
         secureTextEntry={type === 'password'}
         style={{
           flex: 1,
-          height: autoGrow ? Math.max(height, contentHeight) : height,
+          height: autoGrow ? Math.max(inputHeight, contentHeight) : inputHeight,
           textAlignVertical: numberOfLines > 1 ? 'top' : 'center',
           fontSize,
           textAlign,

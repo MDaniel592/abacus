@@ -124,13 +124,13 @@ function AssetsAccounts() {
                 borderColor: colors.listBorderColor,
               }}
             >
-              <AText fontSize={13} numberOfLines={1} style={{ flex: 1 }}>
+              <AText fontSize={13} numberOfLines={2} style={{ flex: 1, minWidth: 0 }}>
                 {account.attributes.name}
                 {account.attributes.includeNetWorth ? '' : ' *'}
               </AText>
               <ASkeleton loading={loading}>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <AText fontSize={14} bold numberOfLines={1}>{localNumberFormat(account.attributes.currencyCode, balance)}</AText>
+                <View style={{ alignItems: 'flex-end', maxWidth: 180 }}>
+                  <AText fontSize={14} bold numberOfLines={1} adjustsFontSizeToFit>{localNumberFormat(account.attributes.currencyCode, balance)}</AText>
                   {difference !== 0 && (
                   <AText fontSize={11} color={difference < 0 && account.attributes.type !== 'liabilities' ? colors.brandDanger : colors.brandSuccess}>
                     {difference > 0 ? '+' : ''}
@@ -452,11 +452,11 @@ function NetWorth() {
           </Pressable>
         </ASkeleton>
         <View style={{
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 6,
+          gap: 8, marginTop: 6,
         }}
         >
           <View style={{
-            flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1,
+            flexDirection: 'row', alignItems: 'flex-start', gap: 12,
           }}
           >
             {[{
@@ -464,27 +464,36 @@ function NetWorth() {
             }, {
               label: 'home_expenses', value: expenses, icon: 'arrow-down', iconColor: '#FFC2C2',
             }].map((metric) => (
-              <View key={metric.label} accessible accessibilityLabel={translate(metric.label)} style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                <MaterialCommunityIcons name={metric.icon as 'arrow-up' | 'arrow-down'} size={14} color={metric.iconColor} />
+              <View key={metric.label} style={{ flex: 1, minWidth: 0, gap: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <MaterialCommunityIcons name={metric.icon as 'arrow-up' | 'arrow-down'} size={14} color={metric.iconColor} />
+                  <AText fontSize={12} color="white">{translate(metric.label)}</AText>
+                </View>
                 <ASkeleton loading={loading}>
-                  <AText fontSize={13} color="white" numberOfLines={1}>
+                  <AText fontSize={13} color="white" bold numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                     {hideBalance ? '••••' : localNumberFormat(currentCode, metric.value)}
                   </AText>
                 </ASkeleton>
               </View>
             ))}
           </View>
-          <ASkeleton loading={loading}>
-            {/* Fixed light pill: the card is purple in both themes. */}
-            <View style={{
-              paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: difference < 0 ? '#FFE5E5' : '#E3F8EC',
-            }}
-            >
-              <AText fontSize={13} bold color={difference < 0 ? '#C81E1E' : '#15803D'} numberOfLines={1}>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            paddingTop: 8,
+            borderTopWidth: 0.5,
+            borderColor: '#ffffff40',
+          }}
+          >
+            <AText fontSize={11} color="white" style={{ flex: 1 }}>{translate('home_period_result')}</AText>
+            <ASkeleton loading={loading}>
+              <AText fontSize={13} bold color={difference < 0 ? '#FFC2C2' : '#A7F3C4'} numberOfLines={1} adjustsFontSizeToFit>
                 {hideBalance ? '••••' : `${difference > 0 ? '+' : ''}${localNumberFormat(currentCode, difference)}`}
               </AText>
-            </View>
-          </ASkeleton>
+            </ASkeleton>
+          </View>
         </View>
       </LinearGradient>
     </View>

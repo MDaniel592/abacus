@@ -61,16 +61,19 @@ export default function BalanceHistoryChart() {
             alignItems="baseline"
             justifyContent="space-between"
             style={{
-              paddingHorizontal: 10,
+              paddingHorizontal: 16,
               paddingVertical: 10,
             }}
           >
-            <AText fontSize={24} bold>
+            <AText fontSize={20} bold style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
               {translate('balance_history_chart')}
               {' '}
               {currentCode}
             </AText>
             <Pressable
+              style={{
+                minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center',
+              }}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch();
                 dispatch.firefly.getBalanceChart();

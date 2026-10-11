@@ -48,7 +48,6 @@ import {
 import PrivacyScreen from '../components/UI/PrivacyScreen';
 import { AbacusQuickAction } from '../types/quickAction';
 import ErrorBoundary from '../components/UI/ErrorBoundary';
-import OfflineNotice from '../components/UI/OfflineNotice';
 
 const Stack = createNativeStackNavigator();
 const TransactionStack = createNativeStackNavigator();
@@ -219,7 +218,6 @@ function Home() {
 
   return (
     <ErrorBoundary>
-      <OfflineNotice />
       <Tab.Navigator
         screenOptions={() => ({
           tabBarInactiveBackgroundColor: colors.tabBackgroundColor,

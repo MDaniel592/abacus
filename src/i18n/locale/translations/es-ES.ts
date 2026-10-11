@@ -1,4 +1,13 @@
 export default {
+  auth_form_biometrics_lock: 'Bloqueo biométrico',
+  configuration_manage_credentials: 'Gestionar conexiones',
+  configuration_transaction_form: 'Formulario de movimientos',
+  close_after_transaction: 'Cerrar el formulario al guardar',
+  home_period_result: 'Resultado del periodo',
+  offline_details: 'Los datos guardados disponibles pueden estar desactualizados. Vuelve a cargar la pantalla para reintentar.',
+  offline_status: 'Datos guardados · Ver estado',
+  offline_title: 'No se puede acceder al servidor',
+
   offline_notice: 'No se puede conectar con el servidor. Se muestran los datos guardados disponibles; pueden estar desactualizados. Vuelve a cargar para reintentar.',
   transaction_form_add_time: 'Añadir hora',
   category_total_balance: 'Balance total',
