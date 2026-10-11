@@ -12,7 +12,7 @@ export default function transactionSearch(payload: GetTransactionsPayload): stri
   if (end) terms.push(`date_before:${moment(end).format('YYYY-MM-DD')}`);
   if (currentCode) terms.push(`currency_is:${JSON.stringify(currentCode)}`);
   if (type) terms.push(`type:${type}`);
-  if (account) terms.push(`account_contains:${JSON.stringify(account)}`);
+  if (account) terms.push(`account_is:${JSON.stringify(account)}`);
   if (category === NO_CATEGORY) {
     terms.push('has_any_category:false');
   } else if (category) {

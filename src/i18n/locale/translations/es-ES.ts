@@ -112,6 +112,7 @@ export default {
   navigation_create_tab: 'Crear',
   today: 'Hoy',
   yesterday: 'Ayer',
+  transaction_day_balance: 'Saldo',
   transaction_search_placeholder: 'Buscar movimientos…',
   navigation_transactions_tab: 'Movimientos',
   navigation_settings_tab: 'Ajustes',

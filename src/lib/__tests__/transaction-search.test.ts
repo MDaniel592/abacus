@@ -21,7 +21,7 @@ describe('transaction category and tag filters', () => {
   it('keeps free text, account and currency filters', () => {
     expect(transactionSearch({
       type: '', search: '  supermercado  ', account: 'Cuenta principal', currentCode: 'EUR',
-    })).toBe('supermercado currency_is:"EUR" account_contains:"Cuenta principal"');
+    })).toBe('supermercado currency_is:"EUR" account_is:"Cuenta principal"');
   });
 
   it('encodes ampersands and preserves the same filters on subsequent pages', async () => {

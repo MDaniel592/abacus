@@ -100,6 +100,7 @@ export default {
   navigation_create_tab: 'Create',
   today: 'Today',
   yesterday: 'Yesterday',
+  transaction_day_balance: 'Balance',
   navigation_transactions_tab: 'Transactions',
   navigation_settings_tab: 'Settings',
   transaction_form_type_withdrawal: 'Withdrawal',

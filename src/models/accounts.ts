@@ -152,5 +152,14 @@ export default createModel<RootModel>()({
         dispatch.accounts.setAccounts({ accounts: filteredAccounts });
       }
     },
+
+    /**
+     * Get an account balance at the end of a day (YYYY-MM-DD)
+     */
+    async getAccountBalance({ id, date }: { id: string, date: string }): Promise<number> {
+      const { data } = await dispatch.configuration.apiFetch({ url: `/api/v1/accounts/${id}?date=${date}` }) as { data: AccountType };
+
+      return parseFloat(data.attributes.currentBalance);
+    },
   }),
 });

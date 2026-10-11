@@ -44,6 +44,17 @@ import OfflineNotice from '../UI/OfflineNotice';
 
 const ITEM_HEIGHT = 60;
 
+// Signed amount a transaction moves in or out of the given account
+const accountDelta = (transaction: TransactionType, accountId: string, accountCurrency: string) => transaction.attributes.transactions.reduce((sum, split) => {
+  let delta = sum;
+  if (`${split.sourceId}` === accountId) delta -= parseFloat(split.amount);
+  if (`${split.destinationId}` === accountId) {
+    const foreign = split.foreignAmount && split.foreignCurrencyCode === accountCurrency && split.currencyCode !== accountCurrency;
+    delta += parseFloat(foreign ? split.foreignAmount : split.amount);
+  }
+  return delta;
+}, 0);
+
 const resetTransactionsDates = (transactions: TransactionSplitType[]) => transactions.map((t) => ({
   ...t,
   date: new Date().toISOString(),
@@ -300,33 +311,68 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
   const [account, setAccount] = useState<string>('');
   const [type, setType] = useState<'' | 'withdrawal' | 'deposit' | 'transfer'>('');
   const [currentCode, setCurrentCode] = useState('');
+  const [balanceAnchor, setBalanceAnchor] = useState<{ accountId: string, date: string, balance: number } | null>(null);
+  const accounts = useSelector((state: RootState) => state.accounts.accounts);
   const {
     transactions: {
       getMoreTransactions,
       getTransactions,
       deleteTransaction,
     },
+    accounts: {
+      getAccountBalance,
+    },
   } = useDispatch<RootDispatch>();
+
+  // Running balance only adds up when the list holds every movement of a single account
+  const balanceAccount = useMemo(() => {
+    if (!account || type || category || tag || search) return undefined;
+    const selected = accounts.find((a) => a.attributes.name === account);
+    if (!selected || (currentCode && currentCode !== selected.attributes.currencyCode)) return undefined;
+    return selected;
+  }, [accounts, account, type, category, tag, search, currentCode]);
+
+  const loadBalanceAnchor = useCallback(async (result: TransactionType[], generation: number) => {
+    const date = result[0]?.attributes?.transactions?.[0]?.date;
+    if (!balanceAccount || !date) {
+      setBalanceAnchor(null);
+      return;
+    }
+    const day = moment(date).format('YYYY-MM-DD');
+    try {
+      const balance = await getAccountBalance({ id: balanceAccount.id, date: day });
+      if (generation === loadGeneration.current) {
+        setBalanceAnchor(Number.isFinite(balance) ? { accountId: balanceAccount.id, date: day, balance } : null);
+      }
+    } catch (error) {
+      if (generation === loadGeneration.current) setBalanceAnchor(null);
+    }
+  }, [balanceAccount, getAccountBalance]);
 
   const onLoad = useCallback(async () => {
     loadGeneration.current += 1;
     const generation = loadGeneration.current;
     setLoading(true);
     setLoadError(false);
+    setBalanceAnchor(null);
     try {
       const result = await getTransactions({
         start, end, type, currentCode, account, category, tag, search,
       });
-      if (generation === loadGeneration.current) setTransactions(result);
+      if (generation === loadGeneration.current) {
+        setTransactions(result);
+        loadBalanceAnchor(result, generation);
+      }
     } catch (error) {
       if (generation === loadGeneration.current) {
         setTransactions([]);
+        setBalanceAnchor(null);
         setLoadError(true);
       }
     } finally {
       if (generation === loadGeneration.current) setLoading(false);
     }
-  }, [getTransactions, start, end, type, currentCode, account, category, tag, search]);
+  }, [getTransactions, loadBalanceAnchor, start, end, type, currentCode, account, category, tag, search]);
 
   const onLoadMore = useCallback(async () => {
     if (loading || loadingMore.current) return;
@@ -400,6 +446,11 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
   const deleteRow = async (id: string) => {
     try {
       await deleteTransaction(id);
+      const deleted = transactions.find((item) => item.id === id);
+      if (deleted && balanceAccount) {
+        const delta = accountDelta(deleted, balanceAccount.id, balanceAccount.attributes.currencyCode);
+        setBalanceAnchor((prev) => (prev ? { ...prev, balance: prev.balance - delta } : prev));
+      }
       setTransactions((prevState) => prevState.filter((item) => item.id !== id));
     } catch (error) {
       setLoadError(true);
@@ -443,7 +494,27 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
         }
       });
 
-      return Array.from(byDay.entries()).map(([title, data]) => {
+      const anchor = balanceAccount && balanceAnchor?.accountId === balanceAccount.id ? balanceAnchor : null;
+      const days = Array.from(byDay.entries());
+      // No movements between the newest listed day and the anchor, so both share the closing balance
+      if (anchor && days[0]?.[0] <= anchor.date) {
+        const { id: accountId, attributes: { currencyCode } } = balanceAccount;
+        let running = anchor.balance;
+        return days.map(([title, data]) => {
+          const total = data.reduce((sum, t) => sum + accountDelta(t, accountId, currencyCode), 0);
+          const balance = running;
+          running -= total;
+          return {
+            title,
+            data,
+            total,
+            balance,
+            currencyCode,
+          };
+        });
+      }
+
+      return days.map(([title, data]) => {
         const currencies = new Set(data.map((t) => t.attributes.transactions[0].currencyCode));
         const total = data.reduce((sum, t) => {
           const amount = t.attributes.transactions.reduce((acc, split) => acc + parseFloat(split.amount), 0);
@@ -457,10 +528,11 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
           data,
           total,
           currencyCode: currencies.size === 1 ? [...currencies][0] : null,
+          balance: undefined as number | undefined,
         };
       });
     },
-    [transactions],
+    [transactions, balanceAccount, balanceAnchor],
   );
 
   const hasFilters = type !== '' || currentCode !== '' || account !== '' || category !== '' || tag !== '' || search !== '';
@@ -543,6 +615,7 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
       )}
       <SwipeListView
         useSectionList
+        stickySectionHeadersEnabled
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={false}
@@ -578,7 +651,14 @@ export default function TransactionsScreen({ navigation, route }: ScreenType) {
               }}
             >
               <AText fontSize={12} color={colors.greyLight} bold capitalize>{label}</AText>
-              {section.currencyCode && section.total !== 0 && (
+              {section.balance !== undefined ? (
+                <AText fontSize={12} color={colors.greyLight} numberOfLines={1} style={{ flexShrink: 1, marginLeft: 8 }}>
+                  {section.total !== 0 && `${section.total > 0 ? '+' : ''}${localNumberFormat(section.currencyCode, section.total)} · `}
+                  <AText fontSize={12} bold>
+                    {`${translate('transaction_day_balance')} ${localNumberFormat(section.currencyCode, section.balance)}`}
+                  </AText>
+                </AText>
+              ) : section.currencyCode && section.total !== 0 && (
               <AText fontSize={12} color={colors.greyLight}>
                 {section.total > 0 ? '+' : ''}
                 {localNumberFormat(section.currencyCode, section.total)}
