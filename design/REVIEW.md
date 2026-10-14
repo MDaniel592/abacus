@@ -1,5 +1,9 @@
 # Revisión de Abacus Personal — 7 octubre 2026
 
+## Corrección del 14 de octubre de 2026
+
+Esta revisión histórica mezclaba el prototipo web con la aplicación nativa. La app del commit `011e1f9`, usado para el APK 0.25.0 (53), y la rama `personal` actual mantienen la pestaña **Gráficos**, conectada a `ChartScreen`, con históricos de cuentas y balance. La pestaña «Categorías» de las capturas pertenece únicamente a la demo `design/index.html`; esas capturas no validan la navegación ni el diseño del APK. Los resultados y la compilación 41 mencionados al final corresponden a la revisión original del 7 de octubre, no a una nueva comprobación del APK 53.
+
 ## Alcance
 
 Revisión del código de navegación, inicio, categorías, movimientos, creación/edición, búsqueda y paginación, ajustes, conexión y funciones originales. Comprobación de la demo en Chromium a 390×844 y 360×740. Validación estática y exportación del paquete JavaScript Android. Esto no equivale a probar un APK instalado ni a comprobar respuestas de una instancia real de Firefly III.
@@ -9,7 +13,7 @@ Revisión del código de navegación, inicio, categorías, movimientos, creació
 | Área | Original | Versión personal |
 | --- | --- | --- |
 | Diseño | Cabeceras amplias y color naranja por defecto | Perspectiva morado, cabecera compacta, menos tarjetas anidadas, densidad uniforme en todas las vistas y contraste refinado |
-| Navegación | Pestaña de gráficos | Pestaña Categorías; botón central de añadir dentro de la barra |
+| Navegación | Pestaña de gráficos | App 53: mantiene Gráficos y el botón central de añadir; la pestaña Categorías solo está en la demo web |
 | Inicio | Periodo inicial trimestral | Periodo inicial mensual, balances por cuenta conservados, selector emergente de mes/trimestre/semestre/año con elección de año |
 | Categorías | Opción de mostrar solo gastos | Ingresos y gastos siempre; balance total primero, diferencias con signo/color y barras con escala común entre categorías |
 | Movimientos | Filas de 90 px | Filas de 60 px, datos agrupados y precio rojo/verde/azul según el tipo |
@@ -24,7 +28,7 @@ Revisión del código de navegación, inicio, categorías, movimientos, creació
 
 ## Funciones conservadas
 
-Editar, duplicar y eliminar movimientos; transferencias; múltiples partidas y título de grupo; moneda extranjera; presupuestos, facturas y huchas; balances históricos por cuenta; orden de cuentas; monedas, búsqueda y filtros previos; gestión de credenciales y autenticación biométrica. Los gráficos se han retirado de la navegación a petición del usuario. El código de gráficos sigue en el repositorio.
+Editar, duplicar y eliminar movimientos; transferencias; múltiples partidas y título de grupo; moneda extranjera; presupuestos, facturas y huchas; balances históricos por cuenta; orden de cuentas; monedas, búsqueda y filtros previos; gestión de credenciales y autenticación biométrica. La app 53 mantiene la pestaña Gráficos con los históricos de cuentas y balance. La demo web utiliza otra navegación.
 
 El formulario de edición sigue mostrando sus campos e importes para poder modificarlos aunque esté activo el modo privado. La ocultación aplica a las vistas de consulta; no bloquea ni cifra la información.
 

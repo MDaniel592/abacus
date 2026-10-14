@@ -44,6 +44,8 @@ Documentación: [APK de Android](https://docs.expo.dev/build-reference/apk/), [c
 
 APK release compilado el 11 de octubre de 2026, de 62,029,478 bytes, paquete `io.github.mdaniel592.abacus`, versión `0.25.0`, versionCode `53`, arquitectura `arm64-v8a` para el S23 Ultra. Firma verificada con el mismo certificado que la versión 52. El archivo versionado está en `design/downloads/abacus-personal-0.25.0-53-arm64.apk` y el enlace fijo apunta a esta compilación.
 
+Código de referencia de esta publicación: commit `011e1f9`. La navegación nativa mantiene **Gráficos**, con históricos de cuentas y balance. Las capturas de `design/README.md` pertenecen a una demo independiente, con «Categorías», y no documentan visualmente este APK.
+
 Inicio: con «Todas las cuentas» desactivado se ocultan también las cuentas con saldo 0. Incluye el saldo diario por cuenta en Movimientos de la versión 52.
 
 Validación: lint correcto y compilación release ARM64 correcta. Pendiente la revisión en el móvil Android contra Firefly III.

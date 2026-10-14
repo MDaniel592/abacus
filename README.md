@@ -5,38 +5,25 @@
   <p>Fork personal de <a href="https://github.com/victorbalssa/abacus">Abacus, de Victor Balssa</a>.</p>
 </div>
 
-Esta versión incorpora una interfaz compacta con acento morado, navegación por Inicio, Categorías y Movimientos, y un formulario de transacciones revisado. La rama de trabajo es **`personal`**; `develop` se reserva para seguir el proyecto original. Consulta la [organización de las ramas](.github/FORK.md).
+Esta versión incorpora una interfaz compacta con acento morado, navegación por Inicio, Gráficos y Movimientos, y un formulario de transacciones revisado. La rama de trabajo es **`personal`**; `develop` se reserva para seguir el proyecto original. Consulta la [organización de las ramas](.github/FORK.md).
 
-## Capturas de la demo
+## Interfaz y versión documentada
 
-Capturas generadas el 14 de octubre de 2026 desde la [demo Perspectiva](design/README.md), a 390 × 844 px. Usan datos ficticios y muestran el prototipo web; la app nativa tiene diferencias de diseño y funciones adicionales. No son capturas del APK ni una validación contra Firefly III.
+La app nativa mantiene las pestañas **Inicio, Gráficos, Movimientos y Ajustes**, además del botón de añadir. «Gráficos» abre los históricos de cuentas y balance. Esto está presente tanto en el código de `personal` como en el código usado para publicar el APK **0.25.0 (53)**, commit `011e1f9`.
 
-<table>
-  <tr><th>Inicio</th><th>Categorías</th><th>Movimientos</th></tr>
-  <tr>
-    <td><img src=".github/img/personal/home-light.png" alt="Demo: inicio en modo claro con saldos por cuenta" width="250" /></td>
-    <td><img src=".github/img/personal/categories-light.png" alt="Demo: ingresos, gastos y balance por categoría" width="250" /></td>
-    <td><img src=".github/img/personal/movements-light.png" alt="Demo: movimientos con búsqueda y filtros" width="250" /></td>
-  </tr>
-  <tr><th>Nuevo movimiento</th><th>Inicio oscuro</th><th>Categorías oscuras</th></tr>
-  <tr>
-    <td><img src=".github/img/personal/form-light.png" alt="Demo: formulario de gasto con detalles visibles" width="250" /></td>
-    <td><img src=".github/img/personal/home-dark.png" alt="Demo: inicio en modo oscuro" width="250" /></td>
-    <td><img src=".github/img/personal/categories-dark.png" alt="Demo: categorías en modo oscuro" width="250" /></td>
-  </tr>
-</table>
+Las [capturas del prototipo web](design/README.md#capturas-del-prototipo-web) corresponden a una demo independiente con datos ficticios y una pestaña «Categorías». Su código no se actualiza desde el 7 de octubre de 2026; no representan fielmente la app 53. No se dispone aquí de capturas verificadas del APK instalado.
 
 ## Cambios de esta versión
 
 - Inicio con saldo neto, ingresos, gastos y resultado del periodo; cuentas con saldo cero ocultas salvo al activar «Todas las cuentas».
 - Selector de mes, trimestre, semestre y año, compartido con Movimientos.
-- Categorías con ingresos, gastos y diferencia, y filtros combinables por categoría y etiqueta.
+- Resumen de categorías en Inicio y filtros combinables por categoría y etiqueta en Movimientos.
 - Movimientos con cabecera fija, filas compactas, búsqueda y saldo diario al filtrar por cuenta.
 - Formulario con detalles visibles, autocompletado, fecha y hora; corrección del cambio entre gasto e ingreso sin cerrar el formulario.
 - Apariencia clara, oscura o del sistema y modo privado en Ajustes.
 - Caché de determinadas consultas y aviso cuando el servidor no está disponible. No ofrece edición ni sincronización de movimientos sin conexión.
 
-Se conservan la autenticación, edición, duplicación y eliminación de movimientos, transferencias, múltiples partidas, presupuestos, facturas y huchas. Los gráficos ya no tienen una pestaña propia; su código se conserva.
+Se conservan la autenticación, edición, duplicación y eliminación de movimientos, transferencias, múltiples partidas, presupuestos, facturas y huchas. La pestaña Gráficos conserva los históricos de cuentas y balance.
 
 ## Instalación Android
 
