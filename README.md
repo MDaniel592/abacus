@@ -1,86 +1,90 @@
 <div align="center">
-    <p></p>
-  <img alt="logo" src=".github/img/icon.png" height=120 />
-  <h1>Abacus: Firefly III mobile application</h1>
-  <div>
-    <a href="https://apps.apple.com/us/app/1627093491"><img width="180" src=".github/img/apple.svg" /></a>
-    <a href="https://play.google.com/store/apps/details?id=abacus.fireflyiii.android.app"><img width="180" src=".github/img/google.svg" /></a>
-  </div>
-  <p></p>
-  <div>
-    <img alt="chart" src=".github/img/light-demo.gif" />
-    <h6>Light Mode</h6>
-    <img alt="chart" src=".github/img/dark-demo.gif" />
-    <h6>Dark Mode</h6>
-  </div>
-  <p></p>
-  <sup>
-
-![size](https://img.shields.io/github/repo-size/victorbalssa/abacus?style=for-the-badge)
-![licence](https://img.shields.io/github/license/victorbalssa/abacus?style=for-the-badge)
-![stars](https://img.shields.io/github/stars/victorbalssa/abacus?style=for-the-badge)
-[![sdk](https://img.shields.io/badge/EXPO-SDK-purple?style=for-the-badge&label=EXPO%20SDK)](https://www.npmjs.com/package/expo)
-[![pr](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
-[![sponsor](https://img.shields.io/github/sponsors/victorbalssa?style=for-the-badge&color=ff69b4)](https://github.com/sponsors/victorbalssa)
-
-  </sup>
+  <img alt="Icono de Abacus Personal" src=".github/img/icon.png" height="100" />
+  <h1>Abacus Personal</h1>
+  <p>Cliente móvil para tu servidor Firefly III, con la interfaz Perspectiva.</p>
+  <p>Fork personal de <a href="https://github.com/victorbalssa/abacus">Abacus, de Victor Balssa</a>.</p>
 </div>
 
----
+Esta versión incorpora una interfaz compacta con acento morado, navegación por Inicio, Categorías y Movimientos, y un formulario de transacciones revisado. La rama de trabajo es **`personal`**; `develop` se reserva para seguir el proyecto original. Consulta la [organización de las ramas](.github/FORK.md).
 
-### 🎙 Introduction
+## Capturas de la demo
 
-[Firefly III](https://github.com/firefly-iii/firefly-iii) mobile application to manage your self-hosted Firefly III from
-your mobile.
+Capturas generadas el 14 de octubre de 2026 desde la [demo Perspectiva](design/README.md), a 390 × 844 px. Usan datos ficticios y muestran el prototipo web; la app nativa tiene diferencias de diseño y funciones adicionales. No son capturas del APK ni una validación contra Firefly III.
 
-Support for iPhone, iPad, Android Phone and Android Tablet.
+<table>
+  <tr><th>Inicio</th><th>Categorías</th><th>Movimientos</th></tr>
+  <tr>
+    <td><img src=".github/img/personal/home-light.png" alt="Demo: inicio en modo claro con saldos por cuenta" width="250" /></td>
+    <td><img src=".github/img/personal/categories-light.png" alt="Demo: ingresos, gastos y balance por categoría" width="250" /></td>
+    <td><img src=".github/img/personal/movements-light.png" alt="Demo: movimientos con búsqueda y filtros" width="250" /></td>
+  </tr>
+  <tr><th>Nuevo movimiento</th><th>Inicio oscuro</th><th>Categorías oscuras</th></tr>
+  <tr>
+    <td><img src=".github/img/personal/form-light.png" alt="Demo: formulario de gasto con detalles visibles" width="250" /></td>
+    <td><img src=".github/img/personal/home-dark.png" alt="Demo: inicio en modo oscuro" width="250" /></td>
+    <td><img src=".github/img/personal/categories-dark.png" alt="Demo: categorías en modo oscuro" width="250" /></td>
+  </tr>
+</table>
 
-On iOS, Tokens are stored in [**iOS Keychains**](https://developer.apple.com/documentation/security/keychain_services).
+## Cambios de esta versión
 
-On Android, Tokens are stored in [**SharedPreferences**](https://developer.android.com/training/data-storage/shared-preferences), encrypted with [**Android's Keystore system**](https://developer.android.com/training/articles/keystore.html).
+- Inicio con saldo neto, ingresos, gastos y resultado del periodo; cuentas con saldo cero ocultas salvo al activar «Todas las cuentas».
+- Selector de mes, trimestre, semestre y año, compartido con Movimientos.
+- Categorías con ingresos, gastos y diferencia, y filtros combinables por categoría y etiqueta.
+- Movimientos con cabecera fija, filas compactas, búsqueda y saldo diario al filtrar por cuenta.
+- Formulario con detalles visibles, autocompletado, fecha y hora; corrección del cambio entre gasto e ingreso sin cerrar el formulario.
+- Apariencia clara, oscura o del sistema y modo privado en Ajustes.
+- Caché de determinadas consultas y aviso cuando el servidor no está disponible. No ofrece edición ni sincronización de movimientos sin conexión.
 
-No external API calls nor Analytics API, not even sentry / crashlytics.
+Se conservan la autenticación, edición, duplicación y eliminación de movimientos, transferencias, múltiples partidas, presupuestos, facturas y huchas. Los gráficos ya no tienen una pestaña propia; su código se conserva.
 
----
+## Instalación Android
 
-### 📱 Features
+La app se instala como **Abacus Personal**, con el paquete `io.github.mdaniel592.abacus`, y puede convivir con la aplicación oficial. Requiere tu propia instancia de [Firefly III](https://github.com/firefly-iii/firefly-iii).
 
-## [🏁 Roadmap](https://github.com/users/victorbalssa/projects/2/views/1)
+La última compilación local documentada es **0.25.0 (53), ARM64**, del 11 de octubre de 2026. El [APK más reciente](http://192.168.1.50:8095/downloads/abacus-personal-latest-arm64.apk) está disponible únicamente desde la red local del servidor; los APK no están incluidos en Git. Los enlaces de las tiendas del proyecto original corresponden a la app oficial.
 
-| Feature                      | Available |
-|------------------------------|:---------:|
-| Oauth2 authentication        |     ✅     |
-| Asset accounts history chart |     ✅     | 
-| Transactions (create, list)  |     ✅     |
-| Net worth                    |     ✅     |
-| Balance                      |     ✅     |
-| Earned                       |     ✅     |
-| Time range selector          |     ✅     |
-| Budgets                      |     ✅     |
-| Categories                   |     ✅     |
-| Translations                 |   ✅(@carvalholeo)    |
-| Piggy bank                   |     ✅     |
+Consulta [EXPO.md](EXPO.md) para compilar, instalar y mantener la firma de las actualizaciones. Las actualizaciones OTA están desactivadas. Sigue pendiente la comprobación de esta versión en el móvil con Firefly III real.
 
----
+## Desarrollo
 
-### 📡 Technologies
+El proyecto utiliza Expo SDK 54, React Native 0.81 y React 19. Con Node.js 22 y npm:
 
-- __Expo SDK__ Framework and a Platform for universal React applications. [docs.expo.io](https://docs.expo.io/)
-- __Routing and navigation__ React Navigation
-  V6. [https://reactnavigation.org/docs](https://reactnavigation.org/docs/getting-started)
-- __Tests__ on simulator/emulator before each EAS build with [@wix/Detox](https://github.com/wix/Detox)
-- __Store arch__
-    - Rematch core [@rematch/core](https://github.com/rematch/rematch)
-    - Loading plugin [@rematch/loading](https://rematchjs.org/docs/plugins/loading)
-    - Persist plugin [@rematch/persist](https://rematchjs.org/docs/plugins/persist)
-- __Linting__
-    - Airbnb's Linting : [https://github.com/airbnb/javascript](https://github.com/airbnb/javascript)
+```sh
+npm ci
+npm run start
+```
 
----
+`start` utiliza un cliente de desarrollo de Expo. Para compilar y ejecutar en Android o iOS, con sus herramientas nativas instaladas:
 
-### 📖 Docs
+```sh
+npm run android
+# En macOS con Xcode:
+npm run ios
+```
 
-- [Contributing to this project](.github/CONTRIBUTING.md)
-- [Understanding the file structure](.github/FILE.md)
-- [Need help with Authentication?](.github/HELP.md)
-- [ReactNative.dev](https://reactnative.dev)
+Comprobaciones del código:
+
+```sh
+npm run lint
+npm run test:unit
+npx tsc --noEmit
+```
+
+Para ver el prototipo con datos ficticios sin compilar la app:
+
+```sh
+docker compose -f compose.preview.yml up -d
+```
+
+Abre [localhost:8095](http://localhost:8095). Los movimientos de la demo viven en memoria y se pierden al recargar; no se envían a Firefly III.
+
+## Documentación y origen
+
+- [Ramas y mantenimiento del fork](.github/FORK.md)
+- [Compilación e instalación del APK personal](EXPO.md)
+- [Demo de diseño](design/README.md) y [revisión de funciones y límites](design/REVIEW.md)
+- [Ayuda de autenticación](.github/HELP.md)
+- [Estructura del proyecto](.github/FILE.md) y [guía de contribución original](.github/CONTRIBUTING.md)
+
+Basado en [victorbalssa/abacus](https://github.com/victorbalssa/abacus). Se conserva la licencia [GNU GPL v3](LICENSE) y el reconocimiento a sus autores y colaboradores.
