@@ -7,11 +7,24 @@
 
 Esta versión incorpora una interfaz compacta con acento morado, navegación por Inicio, Gráficos y Movimientos, y un formulario de transacciones revisado. La rama de trabajo es **`personal`**; `develop` se reserva para seguir el proyecto original. Consulta la [organización de las ramas](.github/FORK.md).
 
-## Interfaz y versión documentada
+## Galería
 
-La app nativa mantiene las pestañas **Inicio, Gráficos, Movimientos y Ajustes**, además del botón de añadir. «Gráficos» abre los históricos de cuentas y balance. Esto está presente tanto en el código de `personal` como en el código usado para publicar el APK **0.25.0 (53)**, commit `011e1f9`.
+Inicio, Gráficos y Movimientos en claro y oscuro, generados desde el código de `personal` (referencia `a101691`, versión 0.25.0 / 53). Son previsualizaciones con **React Native Web y datos ficticios**, a 390 × 844 px; el renderizado puede diferir del APK Android. [Procedimiento y alcance de las capturas](scripts/readme/README.md).
 
-Las [capturas del prototipo web](design/README.md#capturas-del-prototipo-web) corresponden a una demo independiente con datos ficticios y una pestaña «Categorías». Su código no se actualiza desde el 7 de octubre de 2026; no representan fielmente la app 53. No se dispone aquí de capturas verificadas del APK instalado.
+<table>
+  <tr><th>Inicio · claro</th><th>Gráficos · claro</th><th>Movimientos · claro</th></tr>
+  <tr>
+    <td><img src=".github/img/personal/current/home-light.png" alt="Inicio: saldo neto, resultado del periodo y cuentas; pestaña Gráficos en la barra inferior" width="250" /></td>
+    <td><img src=".github/img/personal/current/charts-light.png" alt="Gráficos: histórico de saldos de las cuentas en modo claro" width="250" /></td>
+    <td><img src=".github/img/personal/current/movements-light.png" alt="Movimientos: búsqueda, filtros y lista agrupada por día en modo claro" width="250" /></td>
+  </tr>
+  <tr><th>Inicio · oscuro</th><th>Gráficos · oscuro</th><th>Movimientos · oscuro</th></tr>
+  <tr>
+    <td><img src=".github/img/personal/current/home-dark.png" alt="Inicio con saldos y resultado del periodo en modo oscuro" width="250" /></td>
+    <td><img src=".github/img/personal/current/charts-dark.png" alt="Histórico de saldos de las cuentas en modo oscuro" width="250" /></td>
+    <td><img src=".github/img/personal/current/movements-dark.png" alt="Movimientos agrupados por día en modo oscuro" width="250" /></td>
+  </tr>
+</table>
 
 ## Cambios de esta versión
 
@@ -29,7 +42,7 @@ Se conservan la autenticación, edición, duplicación y eliminación de movimie
 
 La app se instala como **Abacus Personal**, con el paquete `io.github.mdaniel592.abacus`, y puede convivir con la aplicación oficial. Requiere tu propia instancia de [Firefly III](https://github.com/firefly-iii/firefly-iii).
 
-La última compilación local documentada es **0.25.0 (53), ARM64**, del 11 de octubre de 2026. El [APK más reciente](http://192.168.1.50:8095/downloads/abacus-personal-latest-arm64.apk) está disponible únicamente desde la red local del servidor; los APK no están incluidos en Git. Los enlaces de las tiendas del proyecto original corresponden a la app oficial.
+La última compilación local documentada es **0.25.0 (53), ARM64**, del 11 de octubre de 2026. Los APK se generan y distribuyen por separado; no están incluidos en Git. Los enlaces de las tiendas del proyecto original corresponden a la app oficial.
 
 Consulta [EXPO.md](EXPO.md) para compilar, instalar y mantener la firma de las actualizaciones. Las actualizaciones OTA están desactivadas. Sigue pendiente la comprobación de esta versión en el móvil con Firefly III real.
 

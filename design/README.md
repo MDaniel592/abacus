@@ -1,6 +1,6 @@
 # Demo Perspectiva
 
-Demo interactiva: http://192.168.1.50:8095 (misma red local).
+Demo interactiva disponible en `localhost:8095` al arrancar el servidor de previsualización.
 
 Arrancar o mantener el servidor:
 
@@ -16,7 +16,7 @@ Los datos son de ejemplo. Los cambios de movimientos viven en memoria hasta reca
 
 ## Capturas del prototipo web
 
-Estas seis imágenes se generaron el **14 de octubre de 2026** desde `design/index.html`, servido en `http://127.0.0.1:8095/`, con Chromium a 390 × 844 px y escala 2. El último cambio conjunto de los archivos de la demo es el commit `7837c57`, del 7 de octubre de 2026. Se capturó la demo presente en el repositorio en `011e1f9`; no se ejecutó ni capturó el APK.
+Estas seis imágenes se generaron el **14 de octubre de 2026** desde `design/index.html`, servido con `compose.preview.yml`, con Chromium a 390 × 844 px y escala 2. El último cambio conjunto de los archivos de la demo es el commit `7837c57`, del 7 de octubre de 2026. Se capturó la demo presente en el repositorio en `011e1f9`; no se ejecutó ni capturó el APK.
 
 La demo no tiene un número de versión Android. La aplicación **0.25.0 (53)** mantiene «Gráficos» y sus históricos de cuentas y balance; esta demo muestra «Categorías» en su lugar. Inicio, Movimientos y Ajustes también han recibido cambios nativos posteriores que la demo no reproduce. Por eso estas imágenes se conservan solo como referencia del prototipo.
 

@@ -23,7 +23,7 @@ Si prefieres compilar desde GitHub, conecta `MDaniel592/abacus` en la configurac
 
 ## Instalar en el S23 Ultra
 
-La versión actual se descarga desde el enlace fijo [APK más reciente para ARM64](http://192.168.1.50:8095/downloads/abacus-personal-latest-arm64.apk), disponible desde la misma red que el servidor. Cada publicación conserva también su archivo con número de versión y actualiza este enlace `latest`. Abre el APK en el móvil y permite la instalación desde el navegador o gestor de archivos cuando Android lo solicite.
+Cada publicación local guarda el APK en `design/downloads/`, conserva el archivo con número de versión y actualiza `abacus-personal-latest-arm64.apk`. Copia el APK al dispositivo o descárgalo desde el servidor donde lo hayas publicado. Abre el APK en el móvil y permite la instalación desde el navegador o gestor de archivos cuando Android lo solicite.
 
 La app aparece como **Abacus Personal**, junto a la oficial. Hay que introducir la conexión a Firefly III en la nueva instalación. El APK funciona sin un servidor de desarrollo.
 
