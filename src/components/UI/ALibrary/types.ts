@@ -39,7 +39,7 @@ export interface AStyle {
   justifyContent?: 'center' | 'flex-start' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'
   flexDirection?: 'row' | 'column'
   textAlign?: 'center' | 'left' | 'right'
-  maxWidth?: number | '100%' | '90%' | '80%' | '70%' | '60%' | '50%'
+  maxWidth?: number | '100%' | '90%' | '80%' | '70%' | '60%' | '50%' | '40%'
   borderTopLeftRadius?: number
   borderTopRightRadius?: number
   borderBottomRightRadius?: number
